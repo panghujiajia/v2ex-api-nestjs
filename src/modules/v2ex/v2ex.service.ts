@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import cheerio from 'cheerio';
-import { $http } from 'src/common/axios.interceptor';
+import { $http } from 'src/common/interceptors/axios.interceptor';
 const dayjs = require('dayjs');
 const relativeTime = require('dayjs/plugin/relativeTime');
 require('dayjs/locale/zh');

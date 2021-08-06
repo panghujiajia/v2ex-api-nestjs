@@ -20,7 +20,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.V2exService = void 0;
 const common_1 = require("@nestjs/common");
 const cheerio_1 = require("cheerio");
-const axios_interceptor_1 = require("../../common/axios.interceptor");
+const axios_interceptor_1 = require("../../common/interceptors/axios.interceptor");
 const dayjs = require('dayjs');
 const relativeTime = require('dayjs/plugin/relativeTime');
 require('dayjs/locale/zh');

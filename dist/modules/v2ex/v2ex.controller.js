@@ -14,6 +14,7 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.V2exController = void 0;
 const common_1 = require("@nestjs/common");
+const common_2 = require("@nestjs/common");
 const required_exception_1 = require("../../common/exception/required.exception");
 const v2ex_service_1 = require("./v2ex.service");
 let V2exController = class V2exController {
@@ -53,41 +54,42 @@ let V2exController = class V2exController {
     }
 };
 __decorate([
-    common_1.Get('/topics/tab'),
-    __param(0, common_1.Query('tab')),
+    common_2.Get('/topics/tab'),
+    common_1.HttpCode(200),
+    __param(0, common_2.Query('tab')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], V2exController.prototype, "getTabTopics", null);
 __decorate([
-    common_1.Get('/topics/all'),
-    __param(0, common_1.Query()),
+    common_2.Get('/topics/all'),
+    __param(0, common_2.Query()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], V2exController.prototype, "getAllTopics", null);
 __decorate([
-    common_1.Get('/topics/detail'),
-    __param(0, common_1.Query()),
+    common_2.Get('/topics/detail'),
+    __param(0, common_2.Query()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], V2exController.prototype, "getTopicDetail", null);
 __decorate([
-    common_1.Get('/login/params'),
+    common_2.Get('/login/params'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
 ], V2exController.prototype, "getLoginParams", null);
 __decorate([
-    common_1.Post('/login'),
-    __param(0, common_1.Body()),
+    common_2.Post('/login'),
+    __param(0, common_2.Body()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], V2exController.prototype, "getLogin", null);
 V2exController = __decorate([
-    common_1.Controller('api'),
+    common_2.Controller('api'),
     __metadata("design:paramtypes", [v2ex_service_1.V2exService])
 ], V2exController);
 exports.V2exController = V2exController;
