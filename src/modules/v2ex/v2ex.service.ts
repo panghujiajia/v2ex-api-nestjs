@@ -9,6 +9,23 @@ dayjs.extend(relativeTime);
 
 @Injectable()
 export class V2exService {
+    async urlToBase64(url) {
+        try {
+            // let url =
+            //     'https://cdn.v2ex.com/avatar/fa43/c45c/151618_mini.png?m=1461049772';
+            const res = await $http.get(url, {
+                responseType: 'arraybuffer'
+            });
+            return new Promise(resolve => {
+                const { status, data } = res;
+                if (status !== 200) {
+                    resolve(false);
+                }
+                // const suffix = url.split('.').pop().split('?')[0];
+                resolve(`data:image/png;base64,${data.toString('base64')}`);
+            });
+        } catch (err) {}
+    }
     async getHotTopics() {
         try {
             const res = await $http.get('/api/topics/hot.json');
