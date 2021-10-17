@@ -3,7 +3,7 @@ import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { RequireException } from 'src/common/exception/required.exception';
 import { V2exService } from './v2ex.service';
 
-@Controller('api')
+@Controller('v2ex')
 export class V2exController {
     constructor(private v2exService: V2exService) {}
 
