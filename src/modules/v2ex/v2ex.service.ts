@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import cheerio from 'cheerio';
 import { $http } from 'src/common/interceptors/axios.interceptor';
+import axios from 'axios';
 const dayjs = require('dayjs');
 const relativeTime = require('dayjs/plugin/relativeTime');
 require('dayjs/locale/zh');
@@ -238,6 +239,21 @@ export class V2exService {
             });
             console.log(res);
             return res.data;
+        } catch (error) {
+            return false;
+        }
+    }
+
+    async getTopTagConfig() {
+        try {
+            const res = await axios.get(
+                'https://bt.todayhub.cn/down/MM4G776fimCL'
+            );
+            const { status, data } = res;
+            if (status !== 200) {
+                return false;
+            }
+            return Object.values(data);
         } catch (error) {
             return false;
         }

@@ -48,4 +48,9 @@ export class V2exController {
         }
         return this.v2exService.login(params);
     }
+
+    @Get('/top/tag/config')
+    private getTopConfig() {
+        return this.v2exService.getTopTagConfig();
+    }
 }
