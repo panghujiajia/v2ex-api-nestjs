@@ -53,4 +53,14 @@ export class V2exController {
     private getTopConfig() {
         return this.v2exService.getTopTagConfig();
     }
+
+    @Post('/member/username')
+    @HttpCode(200)
+    private getUserInfo(@Body() params: any) {
+        const { username, cookie } = params;
+        if (!username || !cookie) {
+            throw new RequireException();
+        }
+        return this.v2exService.getUserInfo(params);
+    }
 }

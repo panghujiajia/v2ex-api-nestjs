@@ -232,13 +232,22 @@ export class V2exService {
                 params: rest,
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
-                    Origin: 'https://v2ex.com/',
-                    Referer: 'https://v2ex.com/signin',
-                    cookie: '_ga=GA1.2.1598657264.1611848992; _gid=GA1.2.152936328.1634003995; V2EX_REFERRER="2|1:0|10:1634106707|13:V2EX_REFERRER|16:c2t5cGhvbmUwMDE=|12db547d69ff5f225008bc247086fd723a0db8396303318d01fdd8ac7129e339"; PB3_SESSION="2|1:0|10:1634106707|11:PB3_SESSION|40:djJleDoyMDMuMTg0LjEzMi4yMzQ6MTkxNzgxMTc=|b5e65dedb7785922aa446e5af36a3c1db93ff37c1440711204625043df6758a8"; V2EX_LANG=zhcn;'
+                    Origin: 'https://www.v2ex.com/',
+                    Referer: 'https://www.v2ex.com/signin',
+                    cookie
+                },
+                maxRedirects: 0,
+                validateStatus: function (status) {
+                    return status >= 200 && status <= 303;
                 }
             });
-            console.log(res);
-            return res.data;
+            // 拿到cookie列表
+            let cookies = res.headers['set-cookie'];
+            console.log(cookies);
+            cookies = cookies.map(item => {
+                return item.split(';')[0];
+            });
+            return cookies[0];
         } catch (error) {
             return false;
         }
@@ -254,6 +263,18 @@ export class V2exService {
                 return false;
             }
             return Object.values(data);
+        } catch (error) {
+            return false;
+        }
+    }
+
+    async getUserInfo(params: any) {
+        try {
+            const res = await $http.get(`/member/${params.username}`, {
+                headers: { cookie: params.cookie }
+            });
+            console.log(res);
+            return res.data;
         } catch (error) {
             return false;
         }
