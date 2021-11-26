@@ -147,13 +147,22 @@ export class V2exService {
             const res_detail = await $http.get(
                 `/api/topics/show.json?id=${id}`
             );
+            const res_detail1 = await $http.get(`/t/${id}`);
             const res_replys = await $http.get(
                 `/api/replies/show.json?topic_id=${id}`
             );
             if (res_detail.status !== 200 || res_replys.status !== 200) {
                 return false;
             }
+            const $ = cheerio.load(res_detail1.data);
+            const subtle = $('.subtle');
+            if (subtle.length) {
+            }
+            console.log($('.markdown_body').html());
+            console.log(subtle.length);
             const detail = res_detail.data;
+            // console.log(detail);
+            // console.log(res_detail1.data);
             const replys = res_replys.data;
             const master_id = detail[0].member.id;
             if (replys) {
