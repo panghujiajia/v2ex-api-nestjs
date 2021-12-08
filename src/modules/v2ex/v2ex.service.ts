@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import cheerio from 'cheerio';
 import { $http } from 'src/common/interceptors/axios.interceptor';
 import axios from 'axios';
+
 const dayjs = require('dayjs');
 const relativeTime = require('dayjs/plugin/relativeTime');
 require('dayjs/locale/zh');
@@ -10,6 +11,7 @@ dayjs.extend(relativeTime);
 
 @Injectable()
 export class V2exService {
+    //图片链接转base64
     async urlToBase64(url) {
         try {
             // let url =
@@ -27,6 +29,7 @@ export class V2exService {
             });
         } catch (err) {}
     }
+    //热门帖子
     async getHotTopics() {
         try {
             const res = await $http.get('/api/topics/hot.json');
@@ -44,7 +47,7 @@ export class V2exService {
                         id: item.id, // id
                         reply_num: item.replies, // 回复数
                         title: item.title, // 标题
-                        last_reply: dayjs(item.last_modified * 1000).fromNow(), // 最后回复时间
+                        last_reply: this.formatTime(item.last_modified * 1000), // 最后回复时间
                         author: item.member.username, // 作者名
                         avatar: item.member.avatar_mini, // 头像地址
                         tag_value: item.node.name, // node地址
@@ -58,7 +61,7 @@ export class V2exService {
             return false;
         }
     }
-
+    //根据节点获取最新帖子
     async getTabTopics(tab: string) {
         try {
             const res = await $http.get(`?tab=${tab}`);
@@ -82,9 +85,9 @@ export class V2exService {
                         .children()
                         .text(),
                     avatar: item.find($('.avatar')).attr('src'),
-                    last_reply: dayjs(
+                    last_reply: this.formatTime(
                         item.find($('.topic_info span')).attr('title')
-                    ).fromNow(),
+                    ),
                     replyer: item
                         .find($('.topic_info strong'))
                         .last()
@@ -98,7 +101,7 @@ export class V2exService {
             return false;
         }
     }
-
+    //根据节点获取节点下的全部帖子
     async getAllTopics(tab: string, p: string) {
         try {
             const res = await $http.get(`/go/${tab}?p=${p}`);
@@ -125,9 +128,9 @@ export class V2exService {
                         .children()
                         .text(),
                     avatar: item.find($('.avatar')).attr('src'),
-                    last_reply: dayjs(
+                    last_reply: this.formatTime(
                         item.find($('.topic_info span')).attr('title')
-                    ).fromNow(),
+                    ),
                     replyer: item
                         .find($('.topic_info strong'))
                         .last()
@@ -141,28 +144,19 @@ export class V2exService {
             return false;
         }
     }
-
+    //根据id获取帖子详情
     async getTopicDetail(id: string) {
         try {
             const res_detail = await $http.get(
                 `/api/topics/show.json?id=${id}`
             );
-            const res_detail1 = await $http.get(`/t/${id}`);
             const res_replys = await $http.get(
                 `/api/replies/show.json?topic_id=${id}`
             );
             if (res_detail.status !== 200 || res_replys.status !== 200) {
                 return false;
             }
-            const $ = cheerio.load(res_detail1.data);
-            const subtle = $('.subtle');
-            if (subtle.length) {
-            }
-            console.log($('.markdown_body').html());
-            console.log(subtle.length);
             const detail = res_detail.data;
-            // console.log(detail);
-            // console.log(res_detail1.data);
             const replys = res_replys.data;
             const master_id = detail[0].member.id;
             if (replys) {
@@ -175,7 +169,7 @@ export class V2exService {
                         index: i + 1,
                         id: item.member.id,
                         author: item.member.username,
-                        last_reply: dayjs(item.last_modified * 1000).fromNow(),
+                        last_reply: this.formatTime(item.last_modified * 1000),
                         avatar: item.member.avatar_mini
                     };
                 }
@@ -186,7 +180,118 @@ export class V2exService {
             return false;
         }
     }
-
+    formatTime(time: string | number) {
+        return dayjs(time).fromNow();
+    }
+    //根据id获取帖子详情
+    async getTopicDetail1(params: { id: string; p: string }) {
+        try {
+            const { id, p } = params;
+            const res = await $http.get(`/t/${id}?p=${p}`);
+            const $ = cheerio.load(res.data);
+            const box = $('#Main .box');
+            let title,
+                content,
+                author,
+                publish_time,
+                tag_name,
+                tag_link,
+                subtle_list = [],
+                reply_num,
+                last_reply_time,
+                page,
+                reply_list = [];
+            if (Number(p) === 1) {
+                title = $(box).first().find('.header h1').text();
+                author = $(box).first().find('.header .gray a').text();
+                publish_time = this.formatTime(
+                    $(box).first().find('.header .gray span').attr('title')
+                );
+                tag_name = $(box)
+                    .first()
+                    .find('.header .chevron')
+                    .next()
+                    .text();
+                tag_link = $(box)
+                    .first()
+                    .find('.header .chevron')
+                    .next()
+                    .attr('href')
+                    .split('/')[2];
+                const subtle = $(box).first().find('.subtle');
+                if (subtle.length) {
+                    subtle.each((i, el) => {
+                        subtle_list[i] = {
+                            time: this.formatTime(
+                                $(el).find($('.fade span')).attr('title')
+                            ),
+                            content: $(el).find($('.topic_content')).html()
+                        };
+                    });
+                }
+                content = $(box).first().find('.cell .topic_content').html();
+                const reply_info = $(box)
+                    .eq(1)
+                    .find('.cell')
+                    .first()
+                    .find('.gray')
+                    .text()
+                    .split(' 条回复  •  ');
+                reply_num = reply_info[0];
+                last_reply_time = this.formatTime(reply_info[1]);
+                page = $(box)
+                    .eq(1)
+                    .find('.cell .page_input')
+                    .first()
+                    .parent()
+                    .find('a').length;
+            }
+            const reply_content = $(box)
+                .eq(1)
+                .find('.cell')
+                .not((i, el) => !$(el).attr('id'));
+            reply_content.each((i, el) => {
+                reply_list[i] = {
+                    author: $(el).find('.dark').text(),
+                    is_master: author == $(el).find('.dark').text(),
+                    reply_time: this.formatTime(
+                        $(el).find('.ago').attr('title')
+                    ),
+                    like_num: $(el).find('.fade').text().trim(),
+                    content: $(el).find('.reply_content').html()
+                };
+            });
+            console.log({
+                title,
+                content,
+                author,
+                publish_time,
+                tag_name,
+                tag_link,
+                subtle_list,
+                reply_num,
+                last_reply_time,
+                page,
+                reply_list
+            });
+            return {
+                title,
+                content,
+                author,
+                publish_time,
+                tag_name,
+                tag_link,
+                subtle_list,
+                reply_num,
+                last_reply_time,
+                page,
+                reply_list
+            };
+        } catch (error) {
+            return false;
+        }
+    }
+    //获取登录参数
     async getLoginParams() {
         try {
             const res = await $http.get('/signin');
@@ -197,7 +302,6 @@ export class V2exService {
             });
             // 取到需要的值进行拼装
             cookie = cookie.join(';');
-            console.log(cookie);
             const $ = cheerio.load(res.data);
             const formList = $('#Main .box .cell').find($('.sl'));
             const username_key = $(formList[0]).attr('name');
@@ -217,7 +321,7 @@ export class V2exService {
             return false;
         }
     }
-
+    //获取验证码
     async getCode(once: string, cookie: any) {
         try {
             const res = await $http.get(`/_captcha?once=${once}`, {
@@ -233,7 +337,7 @@ export class V2exService {
             return false;
         }
     }
-
+    //登录
     async login(params: any) {
         try {
             const { cookie, ...rest } = params;
@@ -261,11 +365,11 @@ export class V2exService {
             return false;
         }
     }
-
+    //获取热门节点列表
     async getTopTagConfig() {
         try {
             const res = await axios.get(
-                'https://bt.todayhub.cn/down/MM4G776fimCL'
+                'https://cdn.todayhub.cn/lib/tag-config.json'
             );
             const { status, data } = res;
             if (status !== 200) {
@@ -276,7 +380,7 @@ export class V2exService {
             return false;
         }
     }
-
+    //获取用户信息
     async getUserInfo(params: any) {
         try {
             const res = await $http.get(`/member/${params.username}`, {
