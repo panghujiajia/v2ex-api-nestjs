@@ -192,6 +192,7 @@ export class V2exService {
             const $ = cheerio.load(res.data);
             const box = $('#Main .box');
             let id = params.id,
+                avatar,
                 title,
                 content,
                 author,
@@ -248,13 +249,16 @@ export class V2exService {
                     .parent()
                     .find('a').length;
             }
+            avatar = $(box).first().find('.avatar').attr('src');
             const reply_content = $(box)
                 .eq(1)
                 .find('.cell')
                 .not((i, el) => !$(el).attr('id'));
+
             reply_content.each((i, el) => {
                 reply_list[i] = {
                     author: $(el).find('.dark').text(),
+                    avatar: $(el).find('.avatar').attr('src'),
                     is_master: author == $(el).find('.dark').text(),
                     reply_time: this.formatTime(
                         $(el).find('.ago').attr('title')
@@ -265,6 +269,7 @@ export class V2exService {
             });
             return {
                 id,
+                avatar,
                 title,
                 content,
                 author,
