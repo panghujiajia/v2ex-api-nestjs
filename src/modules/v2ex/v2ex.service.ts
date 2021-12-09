@@ -47,11 +47,13 @@ export class V2exService {
                         id: item.id, // id
                         reply_num: item.replies, // 回复数
                         title: item.title, // 标题
-                        last_reply: this.formatTime(item.last_modified * 1000), // 最后回复时间
+                        last_reply_time: this.formatTime(
+                            item.last_modified * 1000
+                        ), // 最后回复时间
                         author: item.member.username, // 作者名
                         avatar: item.member.avatar_mini, // 头像地址
-                        tag_value: item.node.name, // node地址
-                        tab_name: item.node.title // node名
+                        tag_link: item.node.name, // node地址
+                        tag_name: item.node.title // node名
                     });
                 }
                 return list;
@@ -77,15 +79,15 @@ export class V2exService {
                     id: href.replace(/\/t\/(.*?)#.*/g, '$1'),
                     title: item.find($('.topic-link')).text(),
                     reply_num: item.find($('.count_livid')).text() || 0,
-                    tab_name: item.find($('.node')).text(),
-                    tag_value: item.find($('.node')).attr('href').split('/')[2],
+                    tag_name: item.find($('.node')).text(),
+                    tag_link: item.find($('.node')).attr('href').split('/')[2],
                     author: item
                         .find($('.topic_info strong'))
                         .first()
                         .children()
                         .text(),
                     avatar: item.find($('.avatar')).attr('src'),
-                    last_reply: this.formatTime(
+                    last_reply_time: this.formatTime(
                         item.find($('.topic_info span')).attr('title')
                     ),
                     replyer: item
@@ -128,7 +130,7 @@ export class V2exService {
                         .children()
                         .text(),
                     avatar: item.find($('.avatar')).attr('src'),
-                    last_reply: this.formatTime(
+                    last_reply_time: this.formatTime(
                         item.find($('.topic_info span')).attr('title')
                     ),
                     replyer: item
@@ -186,11 +188,11 @@ export class V2exService {
     //根据id获取帖子详情
     async getTopicDetail1(params: { id: string; p: string }) {
         try {
-            const { id, p } = params;
-            const res = await $http.get(`/t/${id}?p=${p}`);
+            const res = await $http.get(`/t/${params.id}?p=${params.p}`);
             const $ = cheerio.load(res.data);
             const box = $('#Main .box');
-            let title,
+            let id = params.id,
+                title,
                 content,
                 author,
                 publish_time,
@@ -201,7 +203,7 @@ export class V2exService {
                 last_reply_time,
                 page,
                 reply_list = [];
-            if (Number(p) === 1) {
+            if (Number(params.p) === 1) {
                 title = $(box).first().find('.header h1').text();
                 author = $(box).first().find('.header .gray a').text();
                 publish_time = this.formatTime(
@@ -261,20 +263,8 @@ export class V2exService {
                     content: $(el).find('.reply_content').html()
                 };
             });
-            console.log({
-                title,
-                content,
-                author,
-                publish_time,
-                tag_name,
-                tag_link,
-                subtle_list,
-                reply_num,
-                last_reply_time,
-                page,
-                reply_list
-            });
             return {
+                id,
                 title,
                 content,
                 author,
@@ -386,8 +376,12 @@ export class V2exService {
             const res = await $http.get(`/member/${params.username}`, {
                 headers: { cookie: params.cookie }
             });
-            console.log(res);
-            return res.data;
+            const $ = cheerio.load(res.data);
+            const box = $('#Main .box');
+            const avatar_src = $(box).first().find('.avatar').attr('src');
+            const avatar = await this.urlToBase64(avatar_src);
+            const info = $(box).first().find('.gray').text();
+            return { avatar, info };
         } catch (error) {
             return false;
         }
