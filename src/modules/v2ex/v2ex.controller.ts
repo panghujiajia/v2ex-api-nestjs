@@ -11,7 +11,7 @@ import { RequireException } from 'src/common/exception/required.exception';
 import { V2exService } from './v2ex.service';
 import { AuthGuard } from '../../common/guard/auth.guard';
 
-@Controller('v2ex')
+@Controller('v2ex/v2')
 export class V2exController {
     constructor(private v2ex: V2exService) {}
 
