@@ -364,13 +364,28 @@ export class V2exService {
     async getTopTagConfig() {
         try {
             const res = await axios.get(
-                'https://cdn.todayhub.cn/lib/tag-config.json'
+                'https://cdn.todayhub.cn/lib/config-tag-top.json'
             );
             const { status, data } = res;
             if (status !== 200) {
                 return false;
             }
             return Object.values(data);
+        } catch (error) {
+            return false;
+        }
+    }
+    //获取全部节点列表
+    async getAllTagConfig() {
+        try {
+            const res = await axios.get(
+                'https://cdn.todayhub.cn/lib/config-tag-all.json'
+            );
+            const { status, data } = res;
+            if (status !== 200) {
+                return false;
+            }
+            return data;
         } catch (error) {
             return false;
         }
@@ -387,6 +402,50 @@ export class V2exService {
             const avatar = await this.urlToBase64(avatar_src);
             const info = $(box).first().find('.gray').text();
             return { avatar, info };
+        } catch (error) {
+            return false;
+        }
+    }
+    //获取用户主题
+    async getUserTopics(params: any) {
+        try {
+            const res = await $http.get(`/member/${params.username}/topics`, {
+                headers: { cookie: params.cookie }
+            });
+            const $ = cheerio.load(res.data);
+            const box = $('#Main .box');
+            const list = $(box).find($('.item'));
+            const len = list.length;
+            const data = [];
+            let i = 0;
+            for (; i < len; i++) {
+                const item = $(list[i]);
+                const href = item.find($('.topic-link')).attr('href');
+                const obj = {
+                    id: href.replace(/\/t\/(.*?)#.*/g, '$1'),
+                    title: item.find($('.topic-link')).text(),
+                    reply_num: item.find($('.count_orange')).text() || 0,
+                    tag_name: item.find($('.node')).text(),
+                    tag_link: item.find($('.node')).attr('href').split('/')[2],
+                    author: item
+                        .find($('.topic_info strong'))
+                        .first()
+                        .children()
+                        .text(),
+                    avatar: $('.avatar').attr('src'),
+                    last_reply_time: this.formatTime(
+                        item.find($('.topic_info span')).attr('title')
+                    ),
+                    replyer: item
+                        .find($('.topic_info strong'))
+                        .last()
+                        .children()
+                        .text()
+                };
+                data.push(obj);
+            }
+            console.log(data);
+            return data;
         } catch (error) {
             return false;
         }

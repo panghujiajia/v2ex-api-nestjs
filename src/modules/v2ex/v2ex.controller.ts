@@ -56,9 +56,14 @@ export class V2exController {
         return this.v2ex.login(params);
     }
 
-    @Get('/top/tag/config')
-    private getTopConfig() {
+    @Get('/config/tag/top')
+    private getTopTagConfig() {
         return this.v2ex.getTopTagConfig();
+    }
+
+    @Get('/config/tag/all')
+    private getAllTagConfig() {
+        return this.v2ex.getAllTagConfig();
     }
 
     @Get('/member/:username')
@@ -71,5 +76,17 @@ export class V2exController {
             throw new RequireException();
         }
         return this.v2ex.getUserInfo({ username, cookie });
+    }
+
+    @Get('/member/:username/topics')
+    @UseGuards(AuthGuard)
+    private getUserTopics(
+        @Param('username') username: string,
+        @Headers('cookie') cookie: string
+    ) {
+        if (!username) {
+            throw new RequireException();
+        }
+        return this.v2ex.getUserTopics({ username, cookie });
     }
 }
