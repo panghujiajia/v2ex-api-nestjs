@@ -89,4 +89,17 @@ export class V2exController {
         }
         return this.v2ex.getUserTopics({ username, cookie });
     }
+
+    @Get('/mission/daily')
+    @UseGuards(AuthGuard)
+    private getLoginRewardInfo(@Headers('cookie') cookie: string) {
+        return this.v2ex.getLoginRewardInfo(cookie);
+    }
+
+    @Post('/mission/daily')
+    @UseGuards(AuthGuard)
+    private getLoginReward(@Headers('cookie') cookie: string) {
+        console.log(cookie);
+        return this.v2ex.getLoginReward(cookie);
+    }
 }

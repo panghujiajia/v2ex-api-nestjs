@@ -69,35 +69,32 @@ export class V2exService {
             const res = await $http.get(`?tab=${tab}`);
             const $ = cheerio.load(res.data);
             const list = $('#Main .box').find($('.item'));
-            const len = list.length;
             const data = [];
-            let i = 0;
-            for (; i < len; i++) {
-                const item = $(list[i]);
-                const href = item.find($('.topic-link')).attr('href');
+            list.each((i, el) => {
+                const href = $(el).find($('.topic-link')).attr('href');
                 const obj = {
                     id: href.replace(/\/t\/(.*?)#.*/g, '$1'),
-                    title: item.find($('.topic-link')).text(),
-                    reply_num: item.find($('.count_livid')).text() || 0,
-                    tag_name: item.find($('.node')).text(),
-                    tag_link: item.find($('.node')).attr('href').split('/')[2],
-                    author: item
+                    title: $(el).find($('.topic-link')).text(),
+                    reply_num: $(el).find($('.count_livid')).text() || 0,
+                    tag_name: $(el).find($('.node')).text(),
+                    tag_link: $(el).find($('.node')).attr('href').split('/')[2],
+                    author: $(el)
                         .find($('.topic_info strong'))
                         .first()
                         .children()
                         .text(),
-                    avatar: item.find($('.avatar')).attr('src'),
+                    avatar: $(el).find($('.avatar')).attr('src'),
                     last_reply_time: this.formatTime(
-                        item.find($('.topic_info span')).attr('title')
+                        $(el).find($('.topic_info span')).attr('title')
                     ),
-                    replyer: item
+                    replyer: $(el)
                         .find($('.topic_info strong'))
                         .last()
                         .children()
                         .text()
                 };
                 data.push(obj);
-            }
+            });
             return data;
         } catch (error) {
             return false;
@@ -110,37 +107,34 @@ export class V2exService {
             const $ = cheerio.load(res.data);
             const header = $('.page-content-header');
             const list = $('#TopicsNode').find($('.cell'));
-            const len = list.length;
             const nodeInfo = {
                 topic_count: $(header).find($('.topic-count strong')).text(),
                 topic_intro: $(header).find($('.intro')).text()
             };
             const data = [];
-            let i = 0;
-            for (; i < len; i++) {
-                const item = $(list[i]);
-                const href = item.find($('.topic-link')).attr('href');
+            list.each((i, el) => {
+                const href = $(el).find($('.topic-link')).attr('href');
                 const obj = {
                     id: href.replace(/\/t\/(.*?)#.*/g, '$1'),
-                    title: item.find($('.topic-link')).text(),
-                    reply_num: item.find($('.count_livid')).text() || 0,
-                    author: item
+                    title: $(el).find($('.topic-link')).text(),
+                    reply_num: $(el).find($('.count_livid')).text() || 0,
+                    author: $(el)
                         .find($('.topic_info strong'))
                         .first()
                         .children()
                         .text(),
-                    avatar: item.find($('.avatar')).attr('src'),
+                    avatar: $(el).find($('.avatar')).attr('src'),
                     last_reply_time: this.formatTime(
-                        item.find($('.topic_info span')).attr('title')
+                        $(el).find($('.topic_info span')).attr('title')
                     ),
-                    replyer: item
+                    replyer: $(el)
                         .find($('.topic_info strong'))
                         .last()
                         .children()
                         .text()
                 };
                 data.push(obj);
-            }
+            });
             return { data, nodeInfo };
         } catch (error) {
             return false;
@@ -224,12 +218,13 @@ export class V2exService {
                 const subtle = $(box).first().find('.subtle');
                 if (subtle.length) {
                     subtle.each((i, el) => {
-                        subtle_list[i] = {
+                        const obj = {
                             time: this.formatTime(
                                 $(el).find($('.fade span')).attr('title')
                             ),
                             content: $(el).find($('.topic_content')).html()
                         };
+                        subtle_list.push(obj);
                     });
                 }
                 content = $(box).first().find('.cell .topic_content').html();
@@ -256,7 +251,7 @@ export class V2exService {
                 .not((i, el) => !$(el).attr('id'));
 
             reply_content.each((i, el) => {
-                reply_list[i] = {
+                const obj = {
                     author: $(el).find('.dark').text(),
                     avatar: $(el).find('.avatar').attr('src'),
                     is_master: author == $(el).find('.dark').text(),
@@ -266,6 +261,7 @@ export class V2exService {
                     like_num: $(el).find('.fade').text().trim(),
                     content: $(el).find('.reply_content').html()
                 };
+                reply_list.push(obj);
             });
             return {
                 id,
@@ -378,13 +374,42 @@ export class V2exService {
     //获取全部节点列表
     async getAllTagConfig() {
         try {
-            const res = await axios.get(
-                'https://cdn.todayhub.cn/lib/config-tag-all.json'
-            );
-            const { status, data } = res;
-            if (status !== 200) {
-                return false;
-            }
+            const res = await $http.get('');
+            const $ = cheerio.load(res.data);
+            const box = $('#Main .box');
+            const cells = $(box).last().find('.cell');
+            const hot = $('.cell>.item_node');
+            const data = {
+                最热节点: []
+            };
+            hot.each((i, el) => {
+                const title = $(el).text();
+                const value = $(el).attr('href').split('/')[2];
+                const obj = {
+                    title,
+                    value
+                };
+                data['最热节点'].push(obj);
+            });
+            cells.each((i, el) => {
+                if (i !== 0) {
+                    const classify = $(el).find('table .fade').text();
+                    const as = $(el).find('table a');
+                    as.each((i, el) => {
+                        const title = $(el).text();
+                        const value = $(el).attr('href').split('/')[2];
+                        const obj = {
+                            title,
+                            value
+                        };
+                        if (data[classify]) {
+                            data[classify].push(obj);
+                        } else {
+                            data[classify] = [obj];
+                        }
+                    });
+                }
+            });
             return data;
         } catch (error) {
             return false;
@@ -415,37 +440,93 @@ export class V2exService {
             const $ = cheerio.load(res.data);
             const box = $('#Main .box');
             const list = $(box).find($('.item'));
-            const len = list.length;
             const data = [];
-            let i = 0;
-            for (; i < len; i++) {
-                const item = $(list[i]);
-                const href = item.find($('.topic-link')).attr('href');
+            list.each((i, el) => {
+                const href = $(el).find($('.topic-link')).attr('href');
                 const obj = {
                     id: href.replace(/\/t\/(.*?)#.*/g, '$1'),
-                    title: item.find($('.topic-link')).text(),
-                    reply_num: item.find($('.count_orange')).text() || 0,
-                    tag_name: item.find($('.node')).text(),
-                    tag_link: item.find($('.node')).attr('href').split('/')[2],
-                    author: item
+                    title: $(el).find($('.topic-link')).text(),
+                    reply_num: $(el).find($('.count_orange')).text() || 0,
+                    tag_name: $(el).find($('.node')).text(),
+                    tag_link: $(el).find($('.node')).attr('href').split('/')[2],
+                    author: $(el)
                         .find($('.topic_info strong'))
                         .first()
                         .children()
                         .text(),
                     avatar: $('.avatar').attr('src'),
                     last_reply_time: this.formatTime(
-                        item.find($('.topic_info span')).attr('title')
+                        $(el).find($('.topic_info span')).attr('title')
                     ),
-                    replyer: item
+                    replyer: $(el)
                         .find($('.topic_info strong'))
                         .last()
                         .children()
                         .text()
                 };
                 data.push(obj);
-            }
-            console.log(data);
+            });
             return data;
+        } catch (error) {
+            return false;
+        }
+    }
+    //用户签到信息
+    async getLoginRewardInfo(cookie: string) {
+        try {
+            const res = await $http.get('/mission/daily', {
+                headers: { cookie }
+            });
+            const $ = cheerio.load(res.data);
+            const btn_value = $('#Main .box .cell').eq(1).find('.button').val();
+            const sign_in_day = $('#Main .box .cell').last().text();
+            let is_sign_in = false;
+            if (btn_value !== '领取 X 铜币') {
+                is_sign_in = true;
+            }
+            return {
+                is_sign_in,
+                sign_in_day
+            };
+        } catch (error) {
+            return false;
+        }
+    }
+    //签到方法
+    async getLoginReward(cookie: string) {
+        try {
+            const res = await $http.get('/mission/daily', {
+                headers: { cookie }
+            });
+            const $ = cheerio.load(res.data);
+            const btn_value = $('#Main .box .cell').eq(1).find('.button').val();
+            // 没签到
+            if (btn_value === '领取 X 铜币') {
+                const once = $('.light-toggle').attr('href').split('?')[1];
+                if (once) {
+                    const data = await $http.get(
+                        `/mission/daily/redeem?${once}`,
+                        {
+                            headers: {
+                                cookie,
+                                Origin: 'https://www.v2ex.com/',
+                                Referer: 'https://www.v2ex.com/mission/daily',
+                                'User-Agent':
+                                    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.93 Safari/537.36'
+                            }
+                        }
+                    );
+                    const $$ = cheerio.load(data.data);
+                    const sign_result = $$('#Main .box .cell')
+                        .eq(1)
+                        .find('.fa-ok-sign')
+                        .text();
+                    if (sign_result) {
+                        return $$('#Main .box .cell').last().text();
+                    }
+                }
+            }
+            return false;
         } catch (error) {
             return false;
         }
