@@ -36,7 +36,7 @@ export class V2exController {
 
     @Get('/topics/detail/:id/:p')
     private getTopicDetail(@Param('id') id: string, @Param('p') p: string) {
-        if (!id) {
+        if (!id || !p) {
             throw new RequireException();
         }
         return this.v2ex.getTopicDetail1({ id, p });
@@ -78,16 +78,30 @@ export class V2exController {
         return this.v2ex.getUserInfo({ username, cookie });
     }
 
-    @Get('/member/:username/topics')
+    @Get('/member/:username/topics/:p')
     @UseGuards(AuthGuard)
     private getUserTopics(
         @Param('username') username: string,
+        @Param('p') p: string,
         @Headers('cookie') cookie: string
     ) {
-        if (!username) {
+        if (!username || !p) {
             throw new RequireException();
         }
-        return this.v2ex.getUserTopics({ username, cookie });
+        return this.v2ex.getUserTopics({ username, cookie, p });
+    }
+
+    @Get('/member/:username/replies/:p')
+    @UseGuards(AuthGuard)
+    private getUserReply(
+        @Param('username') username: string,
+        @Param('p') p: string,
+        @Headers('cookie') cookie: string
+    ) {
+        if (!username || !p) {
+            throw new RequireException();
+        }
+        return this.v2ex.getUserReply({ username, cookie, p });
     }
 
     @Get('/mission/daily')

@@ -68,27 +68,27 @@ export class V2exService {
         try {
             const res = await $http.get(`?tab=${tab}`);
             const $ = cheerio.load(res.data);
-            const list = $('#Main .box').find($('.item'));
+            const list = $('#Main .box').find('.item');
             const data = [];
             list.each((i, el) => {
-                const href = $(el).find($('.topic-link')).attr('href');
+                const href = $(el).find('.topic-link').attr('href');
                 const obj = {
                     id: href.replace(/\/t\/(.*?)#.*/g, '$1'),
-                    title: $(el).find($('.topic-link')).text(),
-                    reply_num: $(el).find($('.count_livid')).text() || 0,
-                    tag_name: $(el).find($('.node')).text(),
-                    tag_link: $(el).find($('.node')).attr('href').split('/')[2],
+                    title: $(el).find('.topic-link').text(),
+                    reply_num: $(el).find('.count_livid').text() || 0,
+                    tag_name: $(el).find('.node').text(),
+                    tag_link: $(el).find('.node').attr('href').split('/')[2],
                     author: $(el)
-                        .find($('.topic_info strong'))
+                        .find('.topic_info strong')
                         .first()
                         .children()
                         .text(),
-                    avatar: $(el).find($('.avatar')).attr('src'),
+                    avatar: $(el).find('.avatar').attr('src'),
                     last_reply_time: this.formatTime(
-                        $(el).find($('.topic_info span')).attr('title')
+                        $(el).find('.topic_info span').attr('title')
                     ),
                     replyer: $(el)
-                        .find($('.topic_info strong'))
+                        .find('.topic_info strong')
                         .last()
                         .children()
                         .text()
@@ -106,29 +106,29 @@ export class V2exService {
             const res = await $http.get(`/go/${tab}?p=${p}`);
             const $ = cheerio.load(res.data);
             const header = $('.page-content-header');
-            const list = $('#TopicsNode').find($('.cell'));
+            const list = $('#TopicsNode').find('.cell');
             const nodeInfo = {
-                topic_count: $(header).find($('.topic-count strong')).text(),
-                topic_intro: $(header).find($('.intro')).text()
+                topic_count: $(header).find('.topic-count strong').text(),
+                topic_intro: $(header).find('.intro').text()
             };
             const data = [];
             list.each((i, el) => {
-                const href = $(el).find($('.topic-link')).attr('href');
+                const href = $(el).find('.topic-link').attr('href');
                 const obj = {
                     id: href.replace(/\/t\/(.*?)#.*/g, '$1'),
-                    title: $(el).find($('.topic-link')).text(),
-                    reply_num: $(el).find($('.count_livid')).text() || 0,
+                    title: $(el).find('.topic-link').text(),
+                    reply_num: $(el).find('.count_livid').text() || 0,
                     author: $(el)
-                        .find($('.topic_info strong'))
+                        .find('.topic_info strong')
                         .first()
                         .children()
                         .text(),
-                    avatar: $(el).find($('.avatar')).attr('src'),
+                    avatar: $(el).find('.avatar').attr('src'),
                     last_reply_time: this.formatTime(
-                        $(el).find($('.topic_info span')).attr('title')
+                        $(el).find('.topic_info span').attr('title')
                     ),
                     replyer: $(el)
-                        .find($('.topic_info strong'))
+                        .find('.topic_info strong')
                         .last()
                         .children()
                         .text()
@@ -220,9 +220,9 @@ export class V2exService {
                     subtle.each((i, el) => {
                         const obj = {
                             time: this.formatTime(
-                                $(el).find($('.fade span')).attr('title')
+                                $(el).find('.fade span').attr('title')
                             ),
-                            content: $(el).find($('.topic_content')).html()
+                            content: $(el).find('.topic_content').html()
                         };
                         subtle_list.push(obj);
                     });
@@ -294,11 +294,11 @@ export class V2exService {
             // 取到需要的值进行拼装
             cookie = cookie.join(';');
             const $ = cheerio.load(res.data);
-            const formList = $('#Main .box .cell').find($('.sl'));
+            const formList = $('#Main .box .cell').find('.sl');
             const username_key = $(formList[0]).attr('name');
             const password_key = $(formList[1]).attr('name');
             const code_key = $(formList[2]).attr('name');
-            const once = $('#Main .box').find($('.super')).prev().attr('value');
+            const once = $('#Main .box').find('.super').prev().attr('value');
             const codeUrl = await this.getCode(once, cookie);
             return {
                 username_key,
@@ -433,39 +433,97 @@ export class V2exService {
     //获取用户主题
     async getUserTopics(params: any) {
         try {
-            const res = await $http.get(`/member/${params.username}/topics`, {
-                headers: { cookie: params.cookie }
-            });
+            const res = await $http.get(
+                `/member/${params.username}/topics?p=${params.p}`,
+                {
+                    headers: { cookie: params.cookie }
+                }
+            );
             const $ = cheerio.load(res.data);
             const box = $('#Main .box');
-            const list = $(box).find($('.item'));
+            const list = $(box).find('.item');
+            const topicInfo = {
+                topic_count: $(box).find('.header .gray').text()
+            };
             const data = [];
             list.each((i, el) => {
-                const href = $(el).find($('.topic-link')).attr('href');
+                const href = $(el).find('.topic-link').attr('href');
                 const obj = {
                     id: href.replace(/\/t\/(.*?)#.*/g, '$1'),
-                    title: $(el).find($('.topic-link')).text(),
-                    reply_num: $(el).find($('.count_orange')).text() || 0,
-                    tag_name: $(el).find($('.node')).text(),
-                    tag_link: $(el).find($('.node')).attr('href').split('/')[2],
+                    title: $(el).find('.topic-link').text(),
+                    reply_num:
+                        $(el).find('.count_orange').text() ||
+                        $(el).find('.count_livid').text() ||
+                        0,
+                    tag_name: $(el).find('.node').text(),
+                    tag_link: $(el).find('.node').attr('href').split('/')[2],
                     author: $(el)
-                        .find($('.topic_info strong'))
+                        .find('.topic_info strong')
                         .first()
                         .children()
                         .text(),
                     avatar: $('.avatar').attr('src'),
                     last_reply_time: this.formatTime(
-                        $(el).find($('.topic_info span')).attr('title')
+                        $(el).find('.topic_info span').attr('title')
                     ),
                     replyer: $(el)
-                        .find($('.topic_info strong'))
+                        .find('.topic_info strong')
                         .last()
                         .children()
                         .text()
                 };
                 data.push(obj);
             });
-            return data;
+            return { data, topicInfo };
+        } catch (error) {
+            return false;
+        }
+    }
+    //获取用户回复
+    async getUserReply(params: any) {
+        try {
+            const res = await $http.get(
+                `/member/${params.username}/replies?p=${params.p}`,
+                {
+                    headers: { cookie: params.cookie }
+                }
+            );
+            const $ = cheerio.load(res.data);
+            const box = $('#Main .box');
+            const list = $(box).find('.dock_area');
+            const topicInfo = {
+                topic_count: $(box).find('.header .gray').text()
+            };
+            const data = [];
+            list.each((i, el) => {
+                const href = $(el).find('.topic-link').attr('href');
+                const obj = {
+                    id: href.replace(/\/t\/(.*?)#.*/g, '$1'),
+                    title: $(el).find('.topic-link').text(),
+                    reply_num:
+                        $(el).find('.count_orange').text() ||
+                        $(el).find('.count_livid').text() ||
+                        0,
+                    tag_name: $(el).find('.node').text(),
+                    tag_link: $(el).find('.node').attr('href').split('/')[2],
+                    author: $(el)
+                        .find('.topic_info strong')
+                        .first()
+                        .children()
+                        .text(),
+                    avatar: $('.avatar').attr('src'),
+                    last_reply_time: this.formatTime(
+                        $(el).find('.topic_info span').attr('title')
+                    ),
+                    replyer: $(el)
+                        .find('.topic_info strong')
+                        .last()
+                        .children()
+                        .text()
+                };
+                data.push(obj);
+            });
+            return { data, topicInfo };
         } catch (error) {
             return false;
         }
