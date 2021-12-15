@@ -347,7 +347,6 @@ export class V2exService {
             });
             // 拿到cookie列表
             let cookies = res.headers['set-cookie'];
-            console.log(cookies);
             cookies = cookies.map(item => {
                 return item.split(';')[0];
             });
@@ -480,51 +479,60 @@ export class V2exService {
             const $ = cheerio.load(res.data);
             const btn_value = $('#Main .box .cell').eq(1).find('.button').val();
             const sign_in_day = $('#Main .box .cell').last().text();
+            const once = $('.light-toggle').attr('href').split('?')[1];
             let is_sign_in = false;
             if (btn_value !== '领取 X 铜币') {
                 is_sign_in = true;
             }
             return {
                 is_sign_in,
-                sign_in_day
+                sign_in_day,
+                once
             };
         } catch (error) {
             return false;
         }
     }
+    //获取签到用的cookie
+    async getV2exTabCookie() {
+        const res = await $http.get('?tab=nodes');
+        let cookies = res.headers['set-cookie'];
+        cookies = cookies.map(item => {
+            return item.split(';')[0];
+        });
+        return cookies.find(item => item.indexOf('V2EX_TAB') > -1);
+    }
     //签到方法
     async getLoginReward(cookie: string) {
         try {
-            const res = await $http.get('/mission/daily', {
-                headers: { cookie }
-            });
-            const $ = cheerio.load(res.data);
-            const btn_value = $('#Main .box .cell').eq(1).find('.button').val();
-            // 没签到
-            if (btn_value === '领取 X 铜币') {
-                const once = $('.light-toggle').attr('href').split('?')[1];
-                if (once) {
+            const res = await this.getLoginRewardInfo(cookie);
+            if (res) {
+                let { is_sign_in, once, sign_in_day } = res;
+                // 没签到
+                if (!is_sign_in) {
+                    const V2EX_TAB = await this.getV2exTabCookie();
                     const data = await $http.get(
                         `/mission/daily/redeem?${once}`,
                         {
                             headers: {
-                                cookie,
-                                Origin: 'https://www.v2ex.com/',
+                                cookie: cookie + ';' + V2EX_TAB,
                                 Referer: 'https://www.v2ex.com/mission/daily',
                                 'User-Agent':
                                     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.93 Safari/537.36'
                             }
                         }
                     );
-                    const $$ = cheerio.load(data.data);
-                    const sign_result = $$('#Main .box .cell')
+                    const $ = cheerio.load(data.data);
+                    const btn_value = $('#Main .box .cell')
                         .eq(1)
-                        .find('.fa-ok-sign')
-                        .text();
-                    if (sign_result) {
-                        return $$('#Main .box .cell').last().text();
+                        .find('.button')
+                        .val();
+                    if (btn_value === '查看我的账户余额') {
+                        sign_in_day = $('#Main .box .cell').last().text();
+                        is_sign_in = true;
                     }
                 }
+                return { sign_in_day, is_sign_in };
             }
             return false;
         } catch (error) {

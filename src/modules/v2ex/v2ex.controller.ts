@@ -99,7 +99,6 @@ export class V2exController {
     @Post('/mission/daily')
     @UseGuards(AuthGuard)
     private getLoginReward(@Headers('cookie') cookie: string) {
-        console.log(cookie);
         return this.v2ex.getLoginReward(cookie);
     }
 }
