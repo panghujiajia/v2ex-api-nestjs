@@ -350,7 +350,7 @@ export class V2exService {
             cookies = cookies.map(item => {
                 return item.split(';')[0];
             });
-            return cookies[0];
+            return cookies[0].includes('A2') ? cookies[0] : false;
         } catch (error) {
             return false;
         }
@@ -436,7 +436,7 @@ export class V2exService {
             const res = await $http.get(
                 `/member/${params.username}/topics?p=${params.p}`,
                 {
-                    headers: { cookie: params.cookie }
+                    headers: { cookie: params.cookie || '' }
                 }
             );
             const $ = cheerio.load(res.data);
@@ -535,8 +535,9 @@ export class V2exService {
                 headers: { cookie }
             });
             const $ = cheerio.load(res.data);
-            const btn_value = $('#Main .box .cell').eq(1).find('.button').val();
-            const sign_in_day = $('#Main .box .cell').last().text();
+            const cell = $('#Main .box .cell');
+            const btn_value = $(cell).eq(1).find('.button').val();
+            const sign_in_day = $(cell).last().text();
             const once = $('.light-toggle').attr('href').split('?')[1];
             let is_sign_in = false;
             if (btn_value !== '领取 X 铜币') {
@@ -593,6 +594,19 @@ export class V2exService {
                 return { sign_in_day, is_sign_in };
             }
             return false;
+        } catch (error) {
+            return false;
+        }
+    }
+    //获取用户余额
+    async getUserBalance(cookie: string) {
+        try {
+            const res = await $http.get('/balance', {
+                headers: { cookie }
+            });
+            const $ = cheerio.load(res.data);
+            const balance = $('#Main .balance_area').text();
+            return balance.split(' ').filter(i => i);
         } catch (error) {
             return false;
         }

@@ -79,7 +79,6 @@ export class V2exController {
     }
 
     @Get('/member/:username/topics/:p')
-    @UseGuards(AuthGuard)
     private getUserTopics(
         @Param('username') username: string,
         @Param('p') p: string,
@@ -92,7 +91,6 @@ export class V2exController {
     }
 
     @Get('/member/:username/replies/:p')
-    @UseGuards(AuthGuard)
     private getUserReply(
         @Param('username') username: string,
         @Param('p') p: string,
@@ -114,5 +112,11 @@ export class V2exController {
     @UseGuards(AuthGuard)
     private getLoginReward(@Headers('cookie') cookie: string) {
         return this.v2ex.getLoginReward(cookie);
+    }
+
+    @Get('/balance')
+    @UseGuards(AuthGuard)
+    private getUserBalance(@Headers('cookie') cookie: string) {
+        return this.v2ex.getUserBalance(cookie);
     }
 }
