@@ -56,9 +56,9 @@ export class V2exController {
         return this.v2ex.login(params);
     }
 
-    @Get('/config/tag/top')
-    private getTopTagConfig() {
-        return this.v2ex.getTopTagConfig();
+    @Get('/config/v2ex')
+    private getV2exConfig() {
+        return this.v2ex.getV2exConfig();
     }
 
     @Get('/config/tag/all')

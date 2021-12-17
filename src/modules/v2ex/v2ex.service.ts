@@ -355,17 +355,17 @@ export class V2exService {
             return false;
         }
     }
-    //获取热门节点列表
-    async getTopTagConfig() {
+    //获取配置
+    async getV2exConfig() {
         try {
             const res = await axios.get(
-                'https://cdn.todayhub.cn/lib/config-tag-top.json'
+                'https://cdn.todayhub.cn/lib/v2ex-config.json'
             );
             const { status, data } = res;
             if (status !== 200) {
                 return false;
             }
-            return Object.values(data);
+            return data;
         } catch (error) {
             return false;
         }
