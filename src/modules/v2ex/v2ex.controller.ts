@@ -27,11 +27,15 @@ export class V2exController {
     }
 
     @Get('/topics/all/:tab/:p')
-    private getAllTopics(@Param('tab') tab: string, @Param('p') p: string) {
+    private getAllTopics(
+        @Param('tab') tab: string,
+        @Param('p') p: string,
+        @Headers('cookie') cookie: string
+    ) {
         if (!tab || !p) {
             throw new RequireException();
         }
-        return this.v2ex.getAllTopics(tab, p);
+        return this.v2ex.getAllTopics({ tab, p, cookie });
     }
 
     @Get('/topics/detail/:id/:p')

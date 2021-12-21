@@ -101,9 +101,11 @@ export class V2exService {
         }
     }
     //根据节点获取节点下的全部帖子
-    async getAllTopics(tab: string, p: string) {
+    async getAllTopics(params: any) {
         try {
-            const res = await $http.get(`/go/${tab}?p=${p}`);
+            const res = await $http.get(`/go/${params.tab}?p=${params.p}`, {
+                headers: { cookie: params.cookie || '' }
+            });
             const $ = cheerio.load(res.data);
             console.log(res.data);
             const header = $('.page-content-header');
@@ -612,8 +614,22 @@ export class V2exService {
                 headers: { cookie }
             });
             const $ = cheerio.load(res.data);
-            const balance = $('#Main .balance_area').text();
-            return balance.split(' ').filter(i => i);
+            const balance = $('#Main .balance_area')
+                .text()
+                .split(' ')
+                .filter(i => i);
+            const imgs = $('#Main .balance_area img');
+            // G金 S银 B铜
+            const balanceObj = {
+                G: '',
+                S: '',
+                B: ''
+            };
+            imgs.each((i, el) => {
+                const key = $(el).attr('alt');
+                balanceObj[key] = balance[i];
+            });
+            return Object.values(balanceObj);
         } catch (error) {
             return false;
         }
