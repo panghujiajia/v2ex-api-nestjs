@@ -105,11 +105,18 @@ export class V2exService {
         try {
             const res = await $http.get(`/go/${tab}?p=${p}`);
             const $ = cheerio.load(res.data);
+            console.log(res.data);
             const header = $('.page-content-header');
             const list = $('#TopicsNode').find('.cell');
             const nodeInfo = {
                 topic_count: $(header).find('.topic-count strong').text(),
-                topic_intro: $(header).find('.intro').text()
+                topic_intro: $(header).find('.intro').text(),
+                topic_title: $(header)
+                    .find('.node-breadcrumb')
+                    .text()
+                    .split('›')
+                    .pop()
+                    .trim()
             };
             const data = [];
             list.each((i, el) => {
