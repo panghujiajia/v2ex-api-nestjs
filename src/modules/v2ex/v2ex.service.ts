@@ -107,7 +107,6 @@ export class V2exService {
                 headers: { cookie: params.cookie || '' }
             });
             const $ = cheerio.load(res.data);
-            console.log(res.data);
             const header = $('.page-content-header');
             const list = $('#TopicsNode').find('.cell');
             const nodeInfo = {
@@ -189,9 +188,11 @@ export class V2exService {
         return dayjs(time).fromNow();
     }
     //根据id获取帖子详情
-    async getTopicDetail1(params: { id: string; p: string }) {
+    async getTopicDetail1(params: any) {
         try {
-            const res = await $http.get(`/t/${params.id}?p=${params.p}`);
+            const res = await $http.get(`/t/${params.id}?p=${params.p}`, {
+                headers: { cookie: params.cookie || '' }
+            });
             const $ = cheerio.load(res.data);
             const box = $('#Main .box');
             let id = params.id,

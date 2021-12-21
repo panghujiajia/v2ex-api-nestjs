@@ -39,11 +39,15 @@ export class V2exController {
     }
 
     @Get('/topics/detail/:id/:p')
-    private getTopicDetail(@Param('id') id: string, @Param('p') p: string) {
+    private getTopicDetail(
+        @Param('id') id: string,
+        @Param('p') p: string,
+        @Headers('cookie') cookie: string
+    ) {
         if (!id || !p) {
             throw new RequireException();
         }
-        return this.v2ex.getTopicDetail1({ id, p });
+        return this.v2ex.getTopicDetail1({ id, p, cookie });
     }
 
     @Get('/login/params')
