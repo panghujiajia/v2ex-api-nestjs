@@ -127,4 +127,10 @@ export class V2exController {
     private getUserBalance(@Headers('cookie') cookie: string) {
         return this.v2ex.getUserBalance(cookie);
     }
+
+    @Get('/notifications')
+    @UseGuards(AuthGuard)
+    private getUserNotifications(@Headers('cookie') cookie: string) {
+        return this.v2ex.getUserNotifications(cookie);
+    }
 }

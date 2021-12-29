@@ -635,4 +635,21 @@ export class V2exService {
             return false;
         }
     }
+    //获取用户通知数量
+    async getUserNotifications(cookie: string) {
+        try {
+            const res = await $http.get('', {
+                headers: { cookie }
+            });
+            const $ = cheerio.load(res.data);
+            const notifications = $('#money')
+                .prev()
+                .text()
+                .split('条未读提醒')[0]
+                .trim();
+            return Number(notifications);
+        } catch (error) {
+            return false;
+        }
+    }
 }
