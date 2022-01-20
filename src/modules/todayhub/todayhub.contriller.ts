@@ -6,7 +6,7 @@ import { RequireException } from '../../common/exception/required.exception';
 export class TodayhubContriller {
     constructor(private todayhub: TodayhubService) {}
 
-    @Get('/')
+    @Get('')
     private getThirdData() {
         return this.todayhub.getThirdData();
     }
