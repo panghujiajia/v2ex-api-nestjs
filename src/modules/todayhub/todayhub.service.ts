@@ -10,7 +10,7 @@ export class TodayhubService {
             if (status == 100000) {
                 return data;
             }
-            return [];
+            return false;
         } catch (error) {
             return false;
         }
@@ -18,14 +18,11 @@ export class TodayhubService {
     async getThirdDataById(id) {
         try {
             const res = await $thirdHop.get(`/item?id=${id}`);
-            const {
-                status,
-                data: { list }
-            } = res.data;
+            const { status, data } = res.data;
             if (status == 100000) {
-                return list;
+                return data;
             }
-            return [];
+            return false;
         } catch (error) {
             return false;
         }

@@ -8,6 +8,5 @@ import { TodayhubModule } from './modules/todayhub/todayhub.module';
     imports: [TodayhubModule, V2exModule],
     controllers: [AppController],
     providers: [AppService]
-    // exports: [V2exModule, TodayhubModule]
 })
 export class AppModule {}
