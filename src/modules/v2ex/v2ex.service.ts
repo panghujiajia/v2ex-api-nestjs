@@ -564,7 +564,7 @@ export class V2exService {
     }
     //获取签到用的cookie
     async getV2exTabCookie() {
-        const res = await $http.get('?tab=nodes');
+        const res = await $http.get('');
         let cookies = res.headers['set-cookie'];
         cookies = cookies.map(item => {
             return item.split(';')[0];
