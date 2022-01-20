@@ -500,36 +500,25 @@ export class V2exService {
             );
             const $ = cheerio.load(res.data);
             const box = $('#Main .box');
-            const list = $(box).find('.dock_area');
+            const dockList = $(box).find('.dock_area');
+            const contentList = $(box).find('.reply_content');
             const topicInfo = {
                 topic_count: $(box).find('.header .gray').text()
             };
             const data = [];
-            list.each((i, el) => {
-                const href = $(el).find('.topic-link').attr('href');
+            dockList.each((i, el) => {
+                let replyInfo = $(el).find('.gray').text().split(' › ');
+                const hrefList = $(el).find('.gray a');
                 const obj = {
-                    id: href.replace(/\/t\/(.*?)#.*/g, '$1'),
-                    title: $(el).find('.topic-link').text(),
-                    reply_num:
-                        $(el).find('.count_orange').text() ||
-                        $(el).find('.count_livid').text() ||
-                        0,
-                    tag_name: $(el).find('.node').text(),
-                    tag_link: $(el).find('.node').attr('href').split('/')[2],
-                    author: $(el)
-                        .find('.topic_info strong')
-                        .first()
-                        .children()
-                        .text(),
-                    avatar: $('.avatar').attr('src'),
-                    last_reply_time: this.formatTime(
-                        $(el).find('.topic_info span').attr('title')
-                    ),
-                    replyer: $(el)
-                        .find('.topic_info strong')
-                        .last()
-                        .children()
-                        .text()
+                    id: $(hrefList[2])
+                        .attr('href')
+                        .replace(/\/t\/(.*?)#.*/g, '$1'),
+                    title: replyInfo[2],
+                    tag_name: replyInfo[1],
+                    tag_link: $(hrefList[1]).attr('href').split('/')[2],
+                    author: $(hrefList[0]).attr('href').split('/')[2],
+                    content: $(contentList[i]).html(),
+                    last_reply_time: $(el).find('.fr .fade').text()
                 };
                 data.push(obj);
             });
