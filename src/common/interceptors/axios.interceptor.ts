@@ -1,4 +1,5 @@
 import axios, { AxiosInstance } from 'axios';
+
 const tunnel = require('tunnel');
 const agent = tunnel.httpsOverHttp({
     proxy: {
@@ -39,5 +40,13 @@ const httpInstance = axios.create({
         Accept: 'application/json'
     }
 });
+const thirdHotInstance = axios.create({
+    baseURL: 'https://momoyu.cc/api/hot',
+    headers: {
+        Accept: 'application/json'
+    }
+});
 createInterceptor(httpInstance);
+createInterceptor(thirdHotInstance);
 export const $http = httpInstance;
+export const $thirdHop = thirdHotInstance;

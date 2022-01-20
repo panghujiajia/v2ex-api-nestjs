@@ -5,8 +5,9 @@ import { V2exModule } from './modules/v2ex/v2ex.module';
 import { TodayhubModule } from './modules/todayhub/todayhub.module';
 
 @Module({
-    imports: [V2exModule, TodayhubModule],
+    imports: [TodayhubModule, V2exModule],
     controllers: [AppController],
     providers: [AppService]
+    // exports: [V2exModule, TodayhubModule]
 })
 export class AppModule {}
