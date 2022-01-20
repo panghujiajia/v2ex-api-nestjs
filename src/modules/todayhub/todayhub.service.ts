@@ -8,7 +8,11 @@ export class TodayhubService {
             const res = await axios.get(
                 `https://momoyu.cc/api/hot/list?type=0`
             );
-            return res.data;
+            const { status, data } = res;
+            if (status === 100000) {
+                return data;
+            }
+            return [];
         } catch (error) {
             return false;
         }
