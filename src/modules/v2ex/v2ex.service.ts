@@ -552,8 +552,12 @@ export class V2exService {
         }
     }
     //获取签到用的cookie
-    async getV2exTabCookie() {
-        const res = await $http.get('');
+    async getV2exTabCookie(cookie: string) {
+        const res = await $http.get('', {
+            headers: {
+                cookie
+            }
+        });
         let cookies = res.headers['set-cookie'];
         console.log('cookies 1', cookies);
         cookies = cookies.map(item => {
@@ -570,7 +574,7 @@ export class V2exService {
                 let { is_sign_in, once, sign_in_day } = res;
                 // 没签到
                 if (!is_sign_in) {
-                    const V2EX_TAB = await this.getV2exTabCookie();
+                    const V2EX_TAB = await this.getV2exTabCookie(cookie);
                     console.log('V2EX_TAB：', V2EX_TAB);
                     const data = await $http.get(
                         `/mission/daily/redeem?${once}`,
