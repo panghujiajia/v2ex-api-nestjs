@@ -555,9 +555,11 @@ export class V2exService {
     async getV2exTabCookie() {
         const res = await $http.get('');
         let cookies = res.headers['set-cookie'];
+        console.log('cookies 1', cookies);
         cookies = cookies.map(item => {
             return item.split(';')[0];
         });
+        console.log('cookies 2', cookies);
         return cookies.find(item => item.indexOf('V2EX_TAB') > -1);
     }
     //签到方法
