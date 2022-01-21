@@ -569,6 +569,7 @@ export class V2exService {
                 // 没签到
                 if (!is_sign_in) {
                     const V2EX_TAB = await this.getV2exTabCookie();
+                    console.log('V2EX_TAB：', V2EX_TAB);
                     const data = await $http.get(
                         `/mission/daily/redeem?${once}`,
                         {
@@ -580,6 +581,7 @@ export class V2exService {
                             }
                         }
                     );
+                    console.log('点击签到返回：', data.data);
                     const $ = cheerio.load(data.data);
                     const btn_value = $('#Main .box .cell')
                         .eq(1)
