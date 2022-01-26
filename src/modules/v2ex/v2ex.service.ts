@@ -75,7 +75,10 @@ export class V2exService {
                 const obj = {
                     id: href.replace(/\/t\/(.*?)#.*/g, '$1'),
                     title: $(el).find('.topic-link').text(),
-                    reply_num: $(el).find('.count_livid').text() || 0,
+                    reply_num:
+                        $(el).find('.count_livid').text() ||
+                        $(el).find('.count_orange').text() ||
+                        0,
                     tag_name: $(el).find('.node').text(),
                     tag_link: $(el).find('.node').attr('href').split('/')[2],
                     author: $(el)
@@ -125,7 +128,10 @@ export class V2exService {
                 const obj = {
                     id: href.replace(/\/t\/(.*?)#.*/g, '$1'),
                     title: $(el).find('.topic-link').text(),
-                    reply_num: $(el).find('.count_livid').text() || 0,
+                    reply_num:
+                        $(el).find('.count_livid').text() ||
+                        $(el).find('.count_orange').text() ||
+                        0,
                     author: $(el)
                         .find('.topic_info strong')
                         .first()
@@ -559,11 +565,9 @@ export class V2exService {
             }
         });
         let cookies = res.headers['set-cookie'];
-        console.log('cookies 1', cookies);
         cookies = cookies.map(item => {
             return item.split(';')[0];
         });
-        console.log('cookies 2', cookies);
         return cookies.find(item => item.indexOf('V2EX_TAB') > -1);
     }
     //签到方法
@@ -575,7 +579,6 @@ export class V2exService {
                 // 没签到
                 if (!is_sign_in) {
                     const V2EX_TAB = await this.getV2exTabCookie(cookie);
-                    console.log('V2EX_TAB：', V2EX_TAB);
                     const data = await $http.get(
                         `/mission/daily/redeem?${once}`,
                         {
@@ -587,7 +590,6 @@ export class V2exService {
                             }
                         }
                     );
-                    console.log('点击签到返回：', data.data);
                     const $ = cheerio.load(data.data);
                     const btn_value = $('#Main .box .cell')
                         .eq(1)
