@@ -9,6 +9,13 @@ require('dayjs/locale/zh');
 dayjs.locale('zh');
 dayjs.extend(relativeTime);
 
+const changeImgUrl = url => {
+    return url.replace(
+        'https://cdn.v2ex.com',
+        'https://tools.kuu.ren/ZEc5dmJITXYxTG5KbGJpOWpkZz09'
+    );
+};
+
 @Injectable()
 export class V2exService {
     //图片链接转base64
@@ -51,7 +58,7 @@ export class V2exService {
                             item.last_modified * 1000
                         ), // 最后回复时间
                         author: item.member.username, // 作者名
-                        avatar: item.member.avatar_mini, // 头像地址
+                        avatar: changeImgUrl(item.member.avatar_mini), // 头像地址
                         tag_link: item.node.name, // node地址
                         tag_name: item.node.title // node名
                     });
@@ -86,7 +93,7 @@ export class V2exService {
                         .first()
                         .children()
                         .text(),
-                    avatar: $(el).find('.avatar').attr('src'),
+                    avatar: changeImgUrl($(el).find('.avatar').attr('src')),
                     last_reply_time: this.formatTime(
                         $(el).find('.topic_info span').attr('title')
                     ),
@@ -137,7 +144,7 @@ export class V2exService {
                         .first()
                         .children()
                         .text(),
-                    avatar: $(el).find('.avatar').attr('src'),
+                    avatar: changeImgUrl($(el).find('.avatar').attr('src')),
                     last_reply_time: this.formatTime(
                         $(el).find('.topic_info span').attr('title')
                     ),
@@ -180,7 +187,7 @@ export class V2exService {
                         id: item.member.id,
                         author: item.member.username,
                         last_reply: this.formatTime(item.last_modified * 1000),
-                        avatar: item.member.avatar_mini
+                        avatar: changeImgUrl(item.member.avatar_mini)
                     };
                 }
                 return { detail, replys };
@@ -260,7 +267,7 @@ export class V2exService {
                     .parent()
                     .find('a').length;
             }
-            avatar = $(box).first().find('.avatar').attr('src');
+            avatar = changeImgUrl($(box).first().find('.avatar').attr('src'));
             const reply_content = $(box)
                 .eq(1)
                 .find('.cell')
@@ -269,7 +276,7 @@ export class V2exService {
             reply_content.each((i, el) => {
                 const obj = {
                     author: $(el).find('.dark').text(),
-                    avatar: $(el).find('.avatar').attr('src'),
+                    avatar: changeImgUrl($(el).find('.avatar').attr('src')),
                     is_master: author == $(el).find('.dark').text(),
                     reply_time: this.formatTime(
                         $(el).find('.ago').attr('title')
@@ -478,7 +485,7 @@ export class V2exService {
                         .first()
                         .children()
                         .text(),
-                    avatar: $('.avatar').attr('src'),
+                    avatar: changeImgUrl($('.avatar').attr('src')),
                     last_reply_time: this.formatTime(
                         $(el).find('.topic_info span').attr('title')
                     ),
