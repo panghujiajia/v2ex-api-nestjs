@@ -446,7 +446,7 @@ export class V2exService {
             const $ = cheerio.load(res.data);
             const box = $('#Main .box');
             const avatar_src = $(box).first().find('.avatar').attr('src');
-            const avatar = await this.urlToBase64(avatar_src);
+            const avatar = changeImgUrl(avatar_src);
             const info = $(box).first().find('.gray').text();
             return { avatar, info };
         } catch (error) {
