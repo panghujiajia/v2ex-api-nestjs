@@ -370,7 +370,10 @@ export class V2exService {
                     Referer: 'https://www.v2ex.com/signin',
                     cookie
                 },
-                maxRedirects: 0
+                maxRedirects: 0,
+                validateStatus: function (status) {
+                    return status >= 200 && status <= 303;
+                }
             });
             // 拿到cookie列表
             let cookies = res.headers['set-cookie'];
