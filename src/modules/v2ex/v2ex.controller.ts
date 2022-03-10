@@ -70,8 +70,8 @@ export class V2exController {
     }
 
     @Get('/config/tag/all')
-    private getAllTagConfig() {
-        return this.v2ex.getAllTagConfig();
+    private getAllTagConfig(@Headers('cookie') cookie: string) {
+        return this.v2ex.getAllTagConfig(cookie);
     }
 
     @Get('/member/:username')
@@ -132,5 +132,14 @@ export class V2exController {
     @UseGuards(AuthGuard)
     private getUserNotifications(@Headers('cookie') cookie: string) {
         return this.v2ex.getUserNotifications(cookie);
+    }
+
+    @Post('/t')
+    private replyTopic(@Body() params: any, @Headers('cookie') cookie: string) {
+        const { once, content, id } = params;
+        if (!content || !once || !id) {
+            throw new RequireException();
+        }
+        return this.v2ex.replyTopic({ ...params, cookie });
     }
 }

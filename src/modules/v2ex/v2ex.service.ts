@@ -209,6 +209,7 @@ export class V2exService {
             const $ = cheerio.load(res.data);
             const box = $('#Main .box');
             let id = params.id,
+                once,
                 avatar,
                 title,
                 content,
@@ -223,7 +224,7 @@ export class V2exService {
                 reply_list = [];
             if (Number(params.p) === 1) {
                 title = $(box).first().find('.header h1').text();
-                author = $(box).first().find('.header .gray a').text();
+                author = $(box).first().find('.header .gray a').first().text();
                 publish_time = this.formatTime(
                     $(box).first().find('.header .gray span').attr('title')
                 );
@@ -251,23 +252,25 @@ export class V2exService {
                     });
                 }
                 content = $(box).first().find('.cell .topic_content').html();
-                const reply_info = $(box)
+                const reply_info: any = $(box)
                     .eq(1)
                     .find('.cell')
                     .first()
                     .find('.gray')
-                    .text()
-                    .split(' 条回复  •  ');
-                reply_num = reply_info[0];
-                last_reply_time = this.formatTime(reply_info[1]);
+                    .text();
+                reply_info.replace(/(.*?) 条回复/, (word, target) => {
+                    reply_num = target;
+                });
                 page = $(box)
                     .eq(1)
                     .find('.cell .page_input')
                     .first()
                     .parent()
                     .find('a').length;
+                avatar = changeImgUrl(
+                    $(box).first().find('.avatar').attr('src')
+                );
             }
-            avatar = changeImgUrl($(box).first().find('.avatar').attr('src'));
             const reply_content = $(box)
                 .eq(1)
                 .find('.cell')
@@ -286,8 +289,12 @@ export class V2exService {
                 };
                 reply_list.push(obj);
             });
+            res.data.replace(/var once = "(.*?)";/, (word, target) => {
+                once = target;
+            });
             return {
                 id,
+                once,
                 avatar,
                 title,
                 content,
@@ -363,10 +370,7 @@ export class V2exService {
                     Referer: 'https://www.v2ex.com/signin',
                     cookie
                 },
-                maxRedirects: 0,
-                validateStatus: function (status) {
-                    return status >= 200 && status <= 303;
-                }
+                maxRedirects: 0
             });
             // 拿到cookie列表
             let cookies = res.headers['set-cookie'];
@@ -394,9 +398,11 @@ export class V2exService {
         }
     }
     //获取全部节点列表
-    async getAllTagConfig() {
+    async getAllTagConfig(cookie) {
         try {
-            const res = await $http.get('');
+            const res = await $http.get('', {
+                headers: { cookie: cookie || '' }
+            });
             const $ = cheerio.load(res.data);
             const box = $('#Main .box');
             const cells = $(box).last().find('.cell');
@@ -654,6 +660,21 @@ export class V2exService {
                 .split('条未读提醒')[0]
                 .trim();
             return Number(notifications);
+        } catch (error) {
+            return false;
+        }
+    }
+    //回贴
+    async replyTopic(params: any) {
+        try {
+            const { once, content, id, cookie } = params;
+            const res = await $http.post(`/t/${id}`, null, {
+                params: { once, content },
+                headers: { cookie }
+            });
+            const $ = cheerio.load(res.data);
+            const problem = $('#Main .problem').text();
+            return !problem;
         } catch (error) {
             return false;
         }
