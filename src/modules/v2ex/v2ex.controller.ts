@@ -110,6 +110,17 @@ export class V2exController {
         return this.v2ex.getUserReply({ username, cookie, p });
     }
 
+    @Get('/message/:p')
+    private getUserMessage(
+        @Param('p') p: string,
+        @Headers('cookie') cookie: string
+    ) {
+        if (!p) {
+            throw new RequireException();
+        }
+        return this.v2ex.getUserMessage({ cookie, p });
+    }
+
     @Get('/mission/daily')
     @UseGuards(AuthGuard)
     private getLoginRewardInfo(@Headers('cookie') cookie: string) {

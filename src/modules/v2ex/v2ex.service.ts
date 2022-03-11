@@ -549,6 +549,48 @@ export class V2exService {
             return false;
         }
     }
+    //获取用户消息
+    async getUserMessage(params: any) {
+        try {
+            const res = await $http.get(`/notifications?p=${params.p}`, {
+                headers: { cookie: params.cookie }
+            });
+            const $ = cheerio.load(res.data);
+            const box = $('#Main .box');
+            const cellList = $(box).find('#notifications .cell');
+            const messageInfo = {
+                message_count: $(box).find('.header .gray').text()
+            };
+            const data = [];
+            cellList.each((i, el) => {
+                const hrefList = $(el).find('.fade a');
+                const message = $(el).find('.fade').text();
+                let messageType = '';
+                if (message.includes('里回复了你')) {
+                    messageType = 'reply';
+                } else if (message.includes('收藏了你发布的主题')) {
+                    messageType = 'collection';
+                } else if (message.includes('感谢了你在主题')) {
+                    messageType = 'thanks';
+                }
+                const obj = {
+                    id: $(hrefList[1])
+                        .attr('href')
+                        .replace(/\/t\/(.*?)#.*/g, '$1'),
+                    title: $(hrefList[1]).text(),
+                    messageType,
+                    author: $(hrefList[0]).attr('href').split('/')[2],
+                    avatar: changeImgUrl($(el).find('.avatar').attr('src')),
+                    content: $(el).find('.payload').html(),
+                    last_reply_time: $(el).find('.snow').text()
+                };
+                data.push(obj);
+            });
+            return { data, messageInfo };
+        } catch (error) {
+            return false;
+        }
+    }
     //用户签到信息
     async getLoginRewardInfo(cookie: string) {
         try {
