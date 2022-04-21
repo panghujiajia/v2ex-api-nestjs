@@ -22,17 +22,9 @@ export class V2exService {
     private token = 'eyUPCrhc15Rtn0Z';
     checkSignature(params) {
         const { signature, timestamp, nonce, echostr } = params;
-        const obj = {
-            token: this.token,
-            timestamp,
-            nonce
-        };
-        let sortArr = Object.keys(obj).sort();
-        let sortObj = {};
-        sortArr.map(key => {
-            sortObj[key] = obj[key];
-        });
-        let str = Object.values(sortObj).join('');
+        const token = this.token;
+        let sortArr = [token, timestamp, nonce].sort();
+        let str = sortArr.join('');
         let hash = createHash('sha1');
         str = hash.update(str).digest('hex');
         if (str === signature) {
