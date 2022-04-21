@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import cheerio from 'cheerio';
 import { $http } from 'src/common/interceptors/axios.interceptor';
 import axios from 'axios';
+import { createHash } from 'crypto';
 
 const dayjs = require('dayjs');
 const relativeTime = require('dayjs/plugin/relativeTime');
@@ -31,7 +32,9 @@ export class V2exService {
         sortArr.map(key => {
             sortObj[key] = obj[key];
         });
-        const str = Object.values(sortObj).join('');
+        let str = Object.values(sortObj).join('');
+        let hash = createHash('sha1');
+        str = hash.update(str).digest('hex');
         if (str === signature) {
             return echostr;
         }
