@@ -5,21 +5,18 @@ import {
     Headers,
     Param,
     Post,
-    Query,
-    UseGuards
+    UseGuards,
+    UseInterceptors
 } from '@nestjs/common';
 import { RequireException } from 'src/common/exception/required.exception';
 import { V2exService } from './v2ex.service';
 import { AuthGuard } from '../../common/guard/auth.guard';
+import { TransformInterceptor } from '../../common/interceptors/transform.interceptor';
 
+@UseInterceptors(TransformInterceptor)
 @Controller('v2ex')
 export class V2exController {
     constructor(private v2ex: V2exService) {}
-
-    @Get('/wx/subscribe')
-    private getWxSubscribe(@Query() params) {
-        return this.v2ex.checkSignature(params);
-    }
 
     @Get('/topics/tab/:tab')
     private getTabTopics(@Param('tab') tab: string) {

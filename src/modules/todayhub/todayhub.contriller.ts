@@ -1,7 +1,9 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, Param, UseInterceptors } from '@nestjs/common';
 import { TodayhubService } from './todayhub.service';
 import { RequireException } from '../../common/exception/required.exception';
+import { TransformInterceptor } from '../../common/interceptors/transform.interceptor';
 
+@UseInterceptors(TransformInterceptor)
 @Controller('todayhub')
 export class TodayhubContriller {
     constructor(private todayhub: TodayhubService) {}

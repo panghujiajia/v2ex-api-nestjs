@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import cheerio from 'cheerio';
 import { $http } from 'src/common/interceptors/axios.interceptor';
 import axios from 'axios';
-import { createHash } from 'crypto';
 
 const dayjs = require('dayjs');
 const relativeTime = require('dayjs/plugin/relativeTime');
@@ -19,19 +18,6 @@ const changeImgUrl = url => {
 
 @Injectable()
 export class V2exService {
-    private token = 'eyUPCrhc15Rtn0Z';
-    checkSignature(params) {
-        const { signature, timestamp, nonce, echostr } = params;
-        const token = this.token;
-        let sortArr = [token, timestamp, nonce].sort();
-        let str = sortArr.join('');
-        let hash = createHash('sha1');
-        str = hash.update(str).digest('hex');
-        if (str === signature) {
-            return echostr;
-        }
-        return false;
-    }
     //图片链接转base64
     async urlToBase64(url) {
         try {

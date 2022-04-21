@@ -1,12 +1,10 @@
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
-import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 
 async function bootstrap() {
     const app = await NestFactory.create(AppModule);
     app.enableCors();
-    app.useGlobalInterceptors(new TransformInterceptor());
     const swaggerOptions = new DocumentBuilder()
         .setTitle('v2ex api document')
         .setDescription('v2ex-api-nest api document')
