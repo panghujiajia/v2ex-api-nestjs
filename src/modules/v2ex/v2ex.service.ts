@@ -18,6 +18,25 @@ const changeImgUrl = url => {
 
 @Injectable()
 export class V2exService {
+    private token = 'eyUPCrhc15Rtn0Z';
+    checkSignature(params) {
+        const { signature, timestamp, nonce, echostr } = params;
+        const obj = {
+            token: this.token,
+            timestamp,
+            nonce
+        };
+        let sortArr = Object.keys(obj).sort();
+        let sortObj = {};
+        sortArr.map(key => {
+            sortObj[key] = obj[key];
+        });
+        const str = Object.values(sortObj).join('');
+        if (str === signature) {
+            return echostr;
+        }
+        return false;
+    }
     //图片链接转base64
     async urlToBase64(url) {
         try {

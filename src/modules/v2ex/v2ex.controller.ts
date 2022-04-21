@@ -15,6 +15,11 @@ import { AuthGuard } from '../../common/guard/auth.guard';
 export class V2exController {
     constructor(private v2ex: V2exService) {}
 
+    @Get('/wx/subscribe')
+    private getWxSubscribe(@Param() params) {
+        return this.v2ex.checkSignature(params);
+    }
+
     @Get('/topics/tab/:tab')
     private getTabTopics(@Param('tab') tab: string) {
         if (!tab) {
