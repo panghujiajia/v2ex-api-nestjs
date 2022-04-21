@@ -5,6 +5,7 @@ import {
     Headers,
     Param,
     Post,
+    Query,
     UseGuards
 } from '@nestjs/common';
 import { RequireException } from 'src/common/exception/required.exception';
@@ -16,7 +17,7 @@ export class V2exController {
     constructor(private v2ex: V2exService) {}
 
     @Get('/wx/subscribe')
-    private getWxSubscribe(@Param() params) {
+    private getWxSubscribe(@Query() params) {
         return this.v2ex.checkSignature(params);
     }
 
