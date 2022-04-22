@@ -2,7 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { createHash } from 'crypto';
 import { $http } from './common/interceptors/axios.interceptor';
 import { ConfigService } from '@nestjs/config';
-import dayjs from 'dayjs';
+
+const dayjs = require('dayjs');
+require('dayjs/locale/zh');
+dayjs.locale('zh');
 
 @Injectable()
 export class AppService {
