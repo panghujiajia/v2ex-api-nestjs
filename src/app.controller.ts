@@ -1,4 +1,4 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { AppService } from './app.service';
 
 @Controller()
@@ -11,7 +11,11 @@ export class AppController {
     }
 
     @Get('/wx/subscribe')
-    private getWxSubscribe(@Query() params) {
+    private checkSignature(@Query() params) {
         return this.appService.checkSignature(params);
+    }
+    @Post('/wx/subscribe')
+    private async getWxSubscribeData(@Param() params) {
+        return this.appService.getWxSubscribeData(params);
     }
 }
