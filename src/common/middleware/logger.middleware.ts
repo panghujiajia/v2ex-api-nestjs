@@ -1,9 +1,11 @@
 import { Injectable, NestMiddleware } from '@nestjs/common';
+import dayjs from 'dayjs';
 
 @Injectable()
 export class LoggerMiddleware implements NestMiddleware {
     use(req: any, res: any, next: () => void) {
         const { method, path, body, query, params } = req;
+        console.log(`访问时间：${dayjs().format('YYYY-MM-DD HH:mm:ss')}`);
         console.log(`接口地址：${method} ${path}`);
         if (path) {
             console.log(`path参数：${path}`);

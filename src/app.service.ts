@@ -2,17 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { createHash } from 'crypto';
 import { $http } from './common/interceptors/axios.interceptor';
 import { ConfigService } from '@nestjs/config';
+import dayjs from 'dayjs';
 
 @Injectable()
 export class AppService {
     constructor(private config: ConfigService) {}
 
     getHello(): string {
-        console.log(this.config);
-        const token = this.config.get('wx.TOKEN');
-        console.log(this.config.get('TOKEN'));
-        console.log(token);
-        return 'Hello World1112!';
+        return 'Hello World!';
     }
 
     checkSignature(params) {
@@ -48,10 +45,10 @@ export class AppService {
             page: 'pages/Hot',
             data: {
                 thing5: {
-                    value: '今日热榜'
+                    value: '来看看今天的热门帖子吧'
                 },
                 date4: {
-                    value: '2015年01月05日'
+                    value: dayjs().format('YYYY年MM月DD日')
                 }
             }
         };

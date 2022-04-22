@@ -22,7 +22,7 @@ export class TransformInterceptor<T>
     ): Observable<Response<T>> {
         return next.handle().pipe(
             map(data => {
-                console.log(`请求结果：${JSON.stringify(data)}`);
+                // console.log(`请求结果：${JSON.stringify(data)}`);
                 return { data, status: 200 };
             })
         );
