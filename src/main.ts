@@ -4,6 +4,7 @@ import { AppModule } from './app.module';
 
 async function bootstrap() {
     const app = await NestFactory.create(AppModule);
+    const { PORT } = process.env;
     app.enableCors();
     const swaggerOptions = new DocumentBuilder()
         .setTitle('v2ex api document')
@@ -15,6 +16,6 @@ async function bootstrap() {
     const document = SwaggerModule.createDocument(app, swaggerOptions);
     SwaggerModule.setup('doc', app, document);
 
-    await app.listen(8888);
+    await app.listen(PORT);
 }
 bootstrap();
