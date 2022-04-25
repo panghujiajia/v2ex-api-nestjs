@@ -16,6 +16,9 @@ export class AppController {
     }
     @Post('/wx/subscribe')
     private async getWxSubscribeData(@Param() params) {
-        return await this.appService.getWxSubscribeData(params);
+        console.log();
+        const data = await this.appService.getWxSubscribeData(params);
+        console.log(data);
+        return data;
     }
 }

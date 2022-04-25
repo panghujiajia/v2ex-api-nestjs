@@ -21,6 +21,7 @@ export class LoggerMiddleware implements NestMiddleware {
         if (JSON.stringify(params) !== '{}') {
             console.log(`params参数：${JSON.stringify(params)}`);
         }
+        console.log('------------------------------');
         next();
     }
 }
