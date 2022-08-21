@@ -12,6 +12,6 @@ export class AuthGuard implements CanActivate {
 }
 
 const validateRequest = (request): boolean => {
-    const { cookie } = request.headers;
-    return cookie && cookie.includes('A2=');
+    const { token } = request.headers;
+    return token && token.includes('A2=');
 };

@@ -114,7 +114,7 @@ export class V2exService {
     async getAllTopics(params: any) {
         try {
             const res = await $http.get(`/go/${params.tab}?p=${params.p}`, {
-                headers: { cookie: params.cookie || '' }
+                headers: { cookie: params.token || '' }
             });
             const $ = cheerio.load(res.data);
             const header = $('.page-content-header');
@@ -204,7 +204,7 @@ export class V2exService {
     async getTopicDetail1(params: any) {
         try {
             const res = await $http.get(`/t/${params.id}?p=${params.p}`, {
-                headers: { cookie: params.cookie || '' }
+                headers: { cookie: params.token || '' }
             });
             const $ = cheerio.load(res.data);
             const box = $('#Main .box');
@@ -401,10 +401,10 @@ export class V2exService {
         }
     }
     //获取全部节点列表
-    async getAllTagConfig(cookie) {
+    async getAllTagConfig(token) {
         try {
             const res = await $http.get('', {
-                headers: { cookie: cookie || '' }
+                headers: { cookie: token || '' }
             });
             const $ = cheerio.load(res.data);
             const box = $('#Main .box');
@@ -450,7 +450,7 @@ export class V2exService {
     async getUserInfo(params: any) {
         try {
             const res = await $http.get(`/member/${params.username}`, {
-                headers: { cookie: params.cookie }
+                headers: { cookie: params.token }
             });
             const $ = cheerio.load(res.data);
             const box = $('#Main .box');
@@ -468,7 +468,7 @@ export class V2exService {
             const res = await $http.get(
                 `/member/${params.username}/topics?p=${params.p}`,
                 {
-                    headers: { cookie: params.cookie || '' }
+                    headers: { cookie: params.token || '' }
                 }
             );
             const $ = cheerio.load(res.data);
@@ -517,7 +517,7 @@ export class V2exService {
             const res = await $http.get(
                 `/member/${params.username}/replies?p=${params.p}`,
                 {
-                    headers: { cookie: params.cookie }
+                    headers: { cookie: params.token }
                 }
             );
             const $ = cheerio.load(res.data);
@@ -553,7 +553,7 @@ export class V2exService {
     async getUserMessage(params: any) {
         try {
             const res = await $http.get(`/notifications?p=${params.p}`, {
-                headers: { cookie: params.cookie }
+                headers: { cookie: params.token }
             });
             const $ = cheerio.load(res.data);
             const box = $('#Main .box');
@@ -592,10 +592,10 @@ export class V2exService {
         }
     }
     //用户签到信息
-    async getLoginRewardInfo(cookie: string) {
+    async getLoginRewardInfo(token: string) {
         try {
             const res = await $http.get('/mission/daily', {
-                headers: { cookie }
+                headers: { cookie: token }
             });
             const $ = cheerio.load(res.data);
             const cell = $('#Main .box .cell');
@@ -616,10 +616,10 @@ export class V2exService {
         }
     }
     //获取签到用的cookie
-    async getV2exTabCookie(cookie: string) {
+    async getV2exTabCookie(token: string) {
         const res = await $http.get('', {
             headers: {
-                cookie
+                cookie: token
             }
         });
         let cookies = res.headers['set-cookie'];
@@ -629,19 +629,19 @@ export class V2exService {
         return cookies.find(item => item.indexOf('V2EX_TAB') > -1);
     }
     //签到方法
-    async getLoginReward(cookie: string) {
+    async getLoginReward(token: string) {
         try {
-            const res = await this.getLoginRewardInfo(cookie);
+            const res = await this.getLoginRewardInfo(token);
             if (res) {
                 let { is_sign_in, once, sign_in_day } = res;
                 // 没签到
                 if (!is_sign_in) {
-                    const V2EX_TAB = await this.getV2exTabCookie(cookie);
+                    const V2EX_TAB = await this.getV2exTabCookie(token);
                     const data = await $http.get(
                         `/mission/daily/redeem?${once}`,
                         {
                             headers: {
-                                cookie: cookie + ';' + V2EX_TAB,
+                                cookie: token + ';' + V2EX_TAB,
                                 Referer: 'https://www.v2ex.com/mission/daily',
                                 'User-Agent':
                                     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.93 Safari/537.36'
@@ -666,10 +666,10 @@ export class V2exService {
         }
     }
     //获取用户余额
-    async getUserBalance(cookie: string) {
+    async getUserBalance(token: string) {
         try {
             const res = await $http.get('/balance', {
-                headers: { cookie }
+                headers: { cookie: token }
             });
             const $ = cheerio.load(res.data);
             const balance = $('#Main .balance_area')
@@ -693,10 +693,10 @@ export class V2exService {
         }
     }
     //获取用户通知数量
-    async getUserNotifications(cookie: string) {
+    async getUserNotifications(token: string) {
         try {
             const res = await $http.get('', {
-                headers: { cookie }
+                headers: { cookie: token }
             });
             const $ = cheerio.load(res.data);
             const notifications = $('#money')
@@ -712,10 +712,10 @@ export class V2exService {
     //回贴
     async replyTopic(params: any) {
         try {
-            const { once, content, id, cookie } = params;
+            const { once, content, id, token } = params;
             const res = await $http.post(`/t/${id}`, null, {
                 params: { once, content },
-                headers: { cookie }
+                headers: { cookie: token }
             });
             const $ = cheerio.load(res.data);
             const problem = $('#Main .problem').text();

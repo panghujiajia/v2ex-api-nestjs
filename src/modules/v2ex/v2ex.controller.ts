@@ -33,24 +33,24 @@ export class V2exController {
     private getAllTopics(
         @Param('tab') tab: string,
         @Param('p') p: string,
-        @Headers('cookie') cookie: string
+        @Headers('token') token: string
     ) {
         if (!tab || !p) {
             throw new RequireException();
         }
-        return this.v2ex.getAllTopics({ tab, p, cookie });
+        return this.v2ex.getAllTopics({ tab, p, token });
     }
 
     @Get('/topics/detail/:id/:p')
     private getTopicDetail(
         @Param('id') id: string,
         @Param('p') p: string,
-        @Headers('cookie') cookie: string
+        @Headers('token') token: string
     ) {
         if (!id || !p) {
             throw new RequireException();
         }
-        return this.v2ex.getTopicDetail1({ id, p, cookie });
+        return this.v2ex.getTopicDetail1({ id, p, token });
     }
 
     @Get('/login/params')
@@ -73,87 +73,87 @@ export class V2exController {
     }
 
     @Get('/config/tag/all')
-    private getAllTagConfig(@Headers('cookie') cookie: string) {
-        return this.v2ex.getAllTagConfig(cookie);
+    private getAllTagConfig(@Headers('token') token: string) {
+        return this.v2ex.getAllTagConfig(token);
     }
 
     @Get('/member/:username')
     @UseGuards(AuthGuard)
     private getUserInfo(
         @Param('username') username: string,
-        @Headers('cookie') cookie: string
+        @Headers('token') token: string
     ) {
         if (!username) {
             throw new RequireException();
         }
-        return this.v2ex.getUserInfo({ username, cookie });
+        return this.v2ex.getUserInfo({ username, token });
     }
 
     @Get('/member/:username/topics/:p')
     private getUserTopics(
         @Param('username') username: string,
         @Param('p') p: string,
-        @Headers('cookie') cookie: string
+        @Headers('token') token: string
     ) {
         if (!username || !p) {
             throw new RequireException();
         }
-        return this.v2ex.getUserTopics({ username, cookie, p });
+        return this.v2ex.getUserTopics({ username, token, p });
     }
 
     @Get('/member/:username/replies/:p')
     private getUserReply(
         @Param('username') username: string,
         @Param('p') p: string,
-        @Headers('cookie') cookie: string
+        @Headers('token') token: string
     ) {
         if (!username || !p) {
             throw new RequireException();
         }
-        return this.v2ex.getUserReply({ username, cookie, p });
+        return this.v2ex.getUserReply({ username, token, p });
     }
 
     @Get('/message/:p')
     private getUserMessage(
         @Param('p') p: string,
-        @Headers('cookie') cookie: string
+        @Headers('token') token: string
     ) {
         if (!p) {
             throw new RequireException();
         }
-        return this.v2ex.getUserMessage({ cookie, p });
+        return this.v2ex.getUserMessage({ token, p });
     }
 
     @Get('/mission/daily')
     @UseGuards(AuthGuard)
-    private getLoginRewardInfo(@Headers('cookie') cookie: string) {
-        return this.v2ex.getLoginRewardInfo(cookie);
+    private getLoginRewardInfo(@Headers('token') token: string) {
+        return this.v2ex.getLoginRewardInfo(token);
     }
 
     @Post('/mission/daily')
     @UseGuards(AuthGuard)
-    private getLoginReward(@Headers('cookie') cookie: string) {
-        return this.v2ex.getLoginReward(cookie);
+    private getLoginReward(@Headers('token') token: string) {
+        return this.v2ex.getLoginReward(token);
     }
 
     @Get('/balance')
     @UseGuards(AuthGuard)
-    private getUserBalance(@Headers('cookie') cookie: string) {
-        return this.v2ex.getUserBalance(cookie);
+    private getUserBalance(@Headers('token') token: string) {
+        return this.v2ex.getUserBalance(token);
     }
 
     @Get('/notifications')
     @UseGuards(AuthGuard)
-    private getUserNotifications(@Headers('cookie') cookie: string) {
-        return this.v2ex.getUserNotifications(cookie);
+    private getUserNotifications(@Headers('token') token: string) {
+        return this.v2ex.getUserNotifications(token);
     }
 
     @Post('/t')
-    private replyTopic(@Body() params: any, @Headers('cookie') cookie: string) {
+    private replyTopic(@Body() params: any, @Headers('token') token: string) {
         const { once, content, id } = params;
         if (!content || !once || !id) {
             throw new RequireException();
         }
-        return this.v2ex.replyTopic({ ...params, cookie });
+        return this.v2ex.replyTopic({ ...params, token });
     }
 }
