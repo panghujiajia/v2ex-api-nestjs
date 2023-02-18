@@ -1,10 +1,10 @@
 import { MiddlewareConsumer, Module } from '@nestjs/common';
 import { LoggerMiddleware } from 'src/common/middleware/logger.middleware';
-import { WorktoolContriller } from './worktool.contriller';
+import { WorktoolController } from './worktool.controller';
 import { WorktoolService } from './worktool.service';
 
 @Module({
-    controllers: [WorktoolContriller],
+    controllers: [WorktoolController],
     providers: [WorktoolService]
 })
 export class WorktoolModule {

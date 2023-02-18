@@ -5,7 +5,7 @@ import { TransformInterceptor } from '../../common/interceptors/transform.interc
 
 @UseInterceptors(TransformInterceptor)
 @Controller('todayhub')
-export class TodayhubContriller {
+export class TodayhubController {
     constructor(private todayhub: TodayhubService) {}
 
     @Get('')

@@ -46,7 +46,15 @@ const thirdHotInstance = axios.create({
         Accept: 'application/json'
     }
 });
+const workToolInstance = axios.create({
+    baseURL: 'https://worktool.asrtts.cn',
+    headers: {
+        Accept: 'application/json'
+    }
+});
 createInterceptor(httpInstance);
 createInterceptor(thirdHotInstance);
+createInterceptor(workToolInstance);
 export const $http = httpInstance;
 export const $thirdHop = thirdHotInstance;
+export const $workTool = workToolInstance;
