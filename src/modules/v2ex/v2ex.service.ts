@@ -318,7 +318,7 @@ export class V2exService {
             const res = await $http.get('/signin');
             // 拿到cookie列表
             const cookies = res.headers['set-cookie'];
-            let cookie = cookies.map(item => {
+            let cookie: any = cookies.map(item => {
                 return item.split(';')[0];
             });
             // 取到需要的值进行拼装

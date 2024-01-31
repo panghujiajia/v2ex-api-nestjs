@@ -4,7 +4,7 @@ const tunnel = require('tunnel');
 const agent = tunnel.httpsOverHttp({
     proxy: {
         host: '127.0.0.1',
-        port: 7890
+        port: 6152
     }
 });
 
@@ -42,6 +42,7 @@ const httpInstance = axios.create({
 });
 const thirdHotInstance = axios.create({
     baseURL: 'https://momoyu.cc/api/hot',
+    httpsAgent: agent,
     headers: {
         Accept: 'application/json'
     }
