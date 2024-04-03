@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import {Injectable} from '@nestjs/common';
 import cheerio from 'cheerio';
-import { $http } from 'src/common/interceptors/axios.interceptor';
+import {$http} from 'src/common/interceptors/axios.interceptor';
 import axios from 'axios';
 
 const dayjs = require('dayjs');
@@ -27,20 +27,33 @@ export class V2exService {
                 responseType: 'arraybuffer'
             });
             return new Promise(resolve => {
-                const { status, data } = res;
+                const {status, data} = res;
                 if (status !== 200) {
                     resolve(false);
                 }
                 // const suffix = url.split('.').pop().split('?')[0];
                 resolve(`data:image/png;base64,${data.toString('base64')}`);
             });
-        } catch (err) {}
+        } catch (err) {
+        }
     }
+
+    // 获取图片
+    async getAvatar(url: any, res: Response) {
+        const buff = Buffer.from(url, 'base64');
+        url = buff.toString();
+        url = 'https://cdn.v2ex.com/' + url;
+        const response = await axios.get(url, {
+            responseType: 'stream',
+        });
+        return response.data.pipe(res);
+    }
+
     //热门帖子
     async getHotTopics() {
         try {
             const res = await $http.get('/api/topics/hot.json');
-            const { status, data } = res;
+            const {status, data} = res;
             if (status !== 200) {
                 return false;
             }
@@ -70,6 +83,7 @@ export class V2exService {
             return false;
         }
     }
+
     //根据节点获取最新帖子
     async getTabTopics(tab: string) {
         try {
@@ -110,11 +124,12 @@ export class V2exService {
             return false;
         }
     }
+
     //根据节点获取节点下的全部帖子
     async getAllTopics(params: any) {
         try {
             const res = await $http.get(`/go/${params.tab}?p=${params.p}`, {
-                headers: { cookie: params.token || '' }
+                headers: {cookie: params.token || ''}
             });
             const $ = cheerio.load(res.data);
             const header = $('.page-content-header');
@@ -156,11 +171,12 @@ export class V2exService {
                 };
                 data.push(obj);
             });
-            return { data, nodeInfo };
+            return {data, nodeInfo};
         } catch (error) {
             return false;
         }
     }
+
     //根据id获取帖子详情
     async getTopicDetail(id: string) {
         try {
@@ -190,21 +206,23 @@ export class V2exService {
                         avatar: changeImgUrl(item.member.avatar_mini)
                     };
                 }
-                return { detail, replys };
+                return {detail, replys};
             }
             return false;
         } catch (error) {
             return false;
         }
     }
+
     formatTime(time: string | number) {
         return dayjs(time).fromNow();
     }
+
     //根据id获取帖子详情
     async getTopicDetail1(params: any) {
         try {
             const res = await $http.get(`/t/${params.id}?p=${params.p}`, {
-                headers: { cookie: params.token || '' }
+                headers: {cookie: params.token || ''}
             });
             const $ = cheerio.load(res.data);
             const box = $('#Main .box');
@@ -312,6 +330,7 @@ export class V2exService {
             return false;
         }
     }
+
     //获取登录参数
     async getLoginParams() {
         try {
@@ -342,6 +361,7 @@ export class V2exService {
             return false;
         }
     }
+
     //获取验证码
     async getCode(once: string, cookie: any) {
         try {
@@ -358,10 +378,11 @@ export class V2exService {
             return false;
         }
     }
+
     //登录
     async login(params: any) {
         try {
-            const { cookie, ...rest } = params;
+            const {cookie, ...rest} = params;
             const res = await $http.post(`/signin`, null, {
                 params: rest,
                 headers: {
@@ -385,13 +406,14 @@ export class V2exService {
             return false;
         }
     }
+
     //获取配置
     async getV2exConfig() {
         try {
             const res = await axios.get(
                 'https://cdn.todayhub.cn/lib/v2ex-config.json'
             );
-            const { status, data } = res;
+            const {status, data} = res;
             if (status !== 200) {
                 return false;
             }
@@ -400,11 +422,12 @@ export class V2exService {
             return false;
         }
     }
+
     //获取全部节点列表
     async getAllTagConfig(token) {
         try {
             const res = await $http.get('', {
-                headers: { cookie: token || '' }
+                headers: {cookie: token || ''}
             });
             const $ = cheerio.load(res.data);
             const box = $('#Main .box');
@@ -446,29 +469,31 @@ export class V2exService {
             return false;
         }
     }
+
     //获取用户信息
     async getUserInfo(params: any) {
         try {
             const res = await $http.get(`/member/${params.username}`, {
-                headers: { cookie: params.token }
+                headers: {cookie: params.token}
             });
             const $ = cheerio.load(res.data);
             const box = $('#Main .box');
             const avatar_src = $(box).first().find('.avatar').attr('src');
             const avatar = changeImgUrl(avatar_src);
             const info = $(box).first().find('.gray').text();
-            return { avatar, info };
+            return {avatar, info};
         } catch (error) {
             return false;
         }
     }
+
     //获取用户主题
     async getUserTopics(params: any) {
         try {
             const res = await $http.get(
                 `/member/${params.username}/topics?p=${params.p}`,
                 {
-                    headers: { cookie: params.token || '' }
+                    headers: {cookie: params.token || ''}
                 }
             );
             const $ = cheerio.load(res.data);
@@ -506,18 +531,19 @@ export class V2exService {
                 };
                 data.push(obj);
             });
-            return { data, topicInfo };
+            return {data, topicInfo};
         } catch (error) {
             return false;
         }
     }
+
     //获取用户回复
     async getUserReply(params: any) {
         try {
             const res = await $http.get(
                 `/member/${params.username}/replies?p=${params.p}`,
                 {
-                    headers: { cookie: params.token }
+                    headers: {cookie: params.token}
                 }
             );
             const $ = cheerio.load(res.data);
@@ -544,16 +570,17 @@ export class V2exService {
                 };
                 data.push(obj);
             });
-            return { data, topicInfo };
+            return {data, topicInfo};
         } catch (error) {
             return false;
         }
     }
+
     //获取用户消息
     async getUserMessage(params: any) {
         try {
             const res = await $http.get(`/notifications?p=${params.p}`, {
-                headers: { cookie: params.token }
+                headers: {cookie: params.token}
             });
             const $ = cheerio.load(res.data);
             const box = $('#Main .box');
@@ -586,16 +613,17 @@ export class V2exService {
                 };
                 data.push(obj);
             });
-            return { data, messageInfo };
+            return {data, messageInfo};
         } catch (error) {
             return false;
         }
     }
+
     //用户签到信息
     async getLoginRewardInfo(token: string) {
         try {
             const res = await $http.get('/mission/daily', {
-                headers: { cookie: token }
+                headers: {cookie: token}
             });
             const $ = cheerio.load(res.data);
             const cell = $('#Main .box .cell');
@@ -615,6 +643,7 @@ export class V2exService {
             return false;
         }
     }
+
     //获取签到用的cookie
     async getV2exTabCookie(token: string) {
         const res = await $http.get('', {
@@ -628,12 +657,13 @@ export class V2exService {
         });
         return cookies.find(item => item.indexOf('V2EX_TAB') > -1);
     }
+
     //签到方法
     async getLoginReward(token: string) {
         try {
             const res = await this.getLoginRewardInfo(token);
             if (res) {
-                let { is_sign_in, once, sign_in_day } = res;
+                let {is_sign_in, once, sign_in_day} = res;
                 // 没签到
                 if (!is_sign_in) {
                     const V2EX_TAB = await this.getV2exTabCookie(token);
@@ -658,18 +688,19 @@ export class V2exService {
                         is_sign_in = true;
                     }
                 }
-                return { sign_in_day, is_sign_in };
+                return {sign_in_day, is_sign_in};
             }
             return false;
         } catch (error) {
             return false;
         }
     }
+
     //获取用户余额
     async getUserBalance(token: string) {
         try {
             const res = await $http.get('/balance', {
-                headers: { cookie: token }
+                headers: {cookie: token}
             });
             const $ = cheerio.load(res.data);
             const balance = $('#Main .balance_area')
@@ -692,11 +723,12 @@ export class V2exService {
             return false;
         }
     }
+
     //获取用户通知数量
     async getUserNotifications(token: string) {
         try {
             const res = await $http.get('', {
-                headers: { cookie: token }
+                headers: {cookie: token}
             });
             const $ = cheerio.load(res.data);
             const notifications = $('#money')
@@ -709,13 +741,14 @@ export class V2exService {
             return false;
         }
     }
+
     //回贴
     async replyTopic(params: any) {
         try {
-            const { once, content, id, token } = params;
+            const {once, content, id, token} = params;
             const res = await $http.post(`/t/${id}`, null, {
-                params: { once, content },
-                headers: { cookie: token }
+                params: {once, content},
+                headers: {cookie: token}
             });
             const $ = cheerio.load(res.data);
             const problem = $('#Main .problem').text();

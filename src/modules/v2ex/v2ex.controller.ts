@@ -1,22 +1,24 @@
-import {
-    Body,
-    Controller,
-    Get,
-    Headers,
-    Param,
-    Post,
-    UseGuards,
-    UseInterceptors
-} from '@nestjs/common';
-import { RequireException } from 'src/common/exception/required.exception';
-import { V2exService } from './v2ex.service';
-import { AuthGuard } from '../../common/guard/auth.guard';
-import { TransformInterceptor } from '../../common/interceptors/transform.interceptor';
+import {Body, Controller, Get, Headers, Param, Post, Req, Res, UseGuards, UseInterceptors} from '@nestjs/common';
+import {RequireException} from 'src/common/exception/required.exception';
+import {V2exService} from './v2ex.service';
+import {AuthGuard} from '../../common/guard/auth.guard';
+import {TransformInterceptor} from '../../common/interceptors/transform.interceptor';
+import axios from "axios";
 
 @UseInterceptors(TransformInterceptor)
 @Controller('v2ex')
 export class V2exController {
-    constructor(private v2ex: V2exService) {}
+    constructor(private v2ex: V2exService) {
+    }
+
+    // avatar md5
+    @Get('/AACA0F5EB4D2D98A6CE6DFFA99F8254B/:url')
+    private async getAvatar(@Param('url') url: string, @Res() res: Response) {
+        if (!url) {
+            throw new RequireException();
+        }
+        return this.v2ex.getAvatar(url, res);
+    }
 
     @Get('/topics/tab/:tab')
     private getTabTopics(@Param('tab') tab: string) {
@@ -38,7 +40,7 @@ export class V2exController {
         if (!tab || !p) {
             throw new RequireException();
         }
-        return this.v2ex.getAllTopics({ tab, p, token });
+        return this.v2ex.getAllTopics({tab, p, token});
     }
 
     @Get('/topics/detail/:id/:p')
@@ -50,7 +52,7 @@ export class V2exController {
         if (!id || !p) {
             throw new RequireException();
         }
-        return this.v2ex.getTopicDetail1({ id, p, token });
+        return this.v2ex.getTopicDetail1({id, p, token});
     }
 
     @Get('/login/params')
@@ -60,7 +62,7 @@ export class V2exController {
 
     @Post('/login')
     private login(@Body() params: any) {
-        const { once } = params;
+        const {once} = params;
         if (!params || !once) {
             throw new RequireException();
         }
@@ -86,7 +88,7 @@ export class V2exController {
         if (!username) {
             throw new RequireException();
         }
-        return this.v2ex.getUserInfo({ username, token });
+        return this.v2ex.getUserInfo({username, token});
     }
 
     @Get('/member/:username/topics/:p')
@@ -98,7 +100,7 @@ export class V2exController {
         if (!username || !p) {
             throw new RequireException();
         }
-        return this.v2ex.getUserTopics({ username, token, p });
+        return this.v2ex.getUserTopics({username, token, p});
     }
 
     @Get('/member/:username/replies/:p')
@@ -110,7 +112,7 @@ export class V2exController {
         if (!username || !p) {
             throw new RequireException();
         }
-        return this.v2ex.getUserReply({ username, token, p });
+        return this.v2ex.getUserReply({username, token, p});
     }
 
     @Get('/message/:p')
@@ -121,7 +123,7 @@ export class V2exController {
         if (!p) {
             throw new RequireException();
         }
-        return this.v2ex.getUserMessage({ token, p });
+        return this.v2ex.getUserMessage({token, p});
     }
 
     @Get('/mission/daily')
@@ -150,10 +152,10 @@ export class V2exController {
 
     @Post('/t')
     private replyTopic(@Body() params: any, @Headers('token') token: string) {
-        const { once, content, id } = params;
+        const {once, content, id} = params;
         if (!content || !once || !id) {
             throw new RequireException();
         }
-        return this.v2ex.replyTopic({ ...params, token });
+        return this.v2ex.replyTopic({...params, token});
     }
 }
