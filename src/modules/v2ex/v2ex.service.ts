@@ -10,10 +10,10 @@ dayjs.locale('zh');
 dayjs.extend(relativeTime);
 
 const changeImgUrl = (url: string) => {
-    return url.replace(
-        'https://cdn.v2ex.com',
-        'https://api.todayhub.cn/v2ex/AACA0F5EB4D2D98A6CE6DFFA99F8254B'
-    );
+    const buff = Buffer.from(url, 'utf-8');
+    url = buff.toString('base64');
+    url = encodeURIComponent(url);
+    return 'https://api.todayhub.cn/v2ex/AACA0F5EB4D2D98A6CE6DFFA99F8254B/' + url;
 };
 
 @Injectable()
@@ -40,13 +40,17 @@ export class V2exService {
 
     // 获取图片
     async getAvatar(url: any, res: Response) {
-        const buff = Buffer.from(url, 'base64');
-        url = buff.toString();
-        url = 'https://cdn.v2ex.com/' + url;
-        const response = await axios.get(url, {
-            responseType: 'stream',
-        });
-        return response.data.pipe(res);
+        try {
+            const buff = Buffer.from(url, 'base64');
+            url = buff.toString('utf-8');
+            url = decodeURIComponent(url);
+            const response = await axios.get(url, {
+                responseType: 'stream',
+            });
+            return response.data.pipe(res);
+        } catch (error) {
+            return false;
+        }
     }
 
     //热门帖子

@@ -1,9 +1,8 @@
-import {Body, Controller, Get, Headers, Param, Post, Req, Res, UseGuards, UseInterceptors} from '@nestjs/common';
+import {Body, Controller, Get, Headers, Param, Post, Res, UseGuards, UseInterceptors} from '@nestjs/common';
 import {RequireException} from 'src/common/exception/required.exception';
 import {V2exService} from './v2ex.service';
 import {AuthGuard} from '../../common/guard/auth.guard';
 import {TransformInterceptor} from '../../common/interceptors/transform.interceptor';
-import axios from "axios";
 
 @UseInterceptors(TransformInterceptor)
 @Controller('v2ex')
