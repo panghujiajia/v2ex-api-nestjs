@@ -9,17 +9,17 @@ require('dayjs/locale/zh');
 dayjs.locale('zh');
 dayjs.extend(relativeTime);
 
-const changeImgUrl = url => {
+const changeImgUrl = (url: string) => {
     return url.replace(
         'https://cdn.v2ex.com',
-        'https://tools.kuu.ren/ZEc5dmJITXYxTG5KbGJpOWpkZz09'
+        'https://api.todayhub.cn/v2ex/AACA0F5EB4D2D98A6CE6DFFA99F8254B'
     );
 };
 
 @Injectable()
 export class V2exService {
     //图片链接转base64
-    async urlToBase64(url) {
+    async urlToBase64(url: string) {
         try {
             // let url =
             //     'https://cdn.v2ex.com/avatar/fa43/c45c/151618_mini.png?m=1461049772';
