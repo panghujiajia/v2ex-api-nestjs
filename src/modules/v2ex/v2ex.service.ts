@@ -44,11 +44,13 @@ export class V2exService {
             const buff = Buffer.from(url, 'base64');
             url = buff.toString('utf-8');
             url = decodeURIComponent(url);
+            console.log(url)
             const response = await axios.get(url, {
                 responseType: 'stream',
             });
             return response.data.pipe(res);
         } catch (error) {
+            console.log(error)
             return false;
         }
     }
@@ -181,49 +183,49 @@ export class V2exService {
         }
     }
 
-    //根据id获取帖子详情
-    async getTopicDetail(id: string) {
-        try {
-            const res_detail = await $http.get(
-                `/api/topics/show.json?id=${id}`
-            );
-            const res_replys = await $http.get(
-                `/api/replies/show.json?topic_id=${id}`
-            );
-            if (res_detail.status !== 200 || res_replys.status !== 200) {
-                return false;
-            }
-            const detail = res_detail.data;
-            const replys = res_replys.data;
-            const master_id = detail[0].member.id;
-            if (replys) {
-                const len = replys.length;
-                for (let i = 0; i < len; i++) {
-                    const item = replys[i];
-                    const is_master = item.member.id === master_id;
-                    item.user = {
-                        is_master,
-                        index: i + 1,
-                        id: item.member.id,
-                        author: item.member.username,
-                        last_reply: this.formatTime(item.last_modified * 1000),
-                        avatar: changeImgUrl(item.member.avatar_mini)
-                    };
-                }
-                return {detail, replys};
-            }
-            return false;
-        } catch (error) {
-            return false;
-        }
-    }
+    //根据id获取帖子详情（官方接口）
+    // async getTopicDetail(id: string) {
+    //     try {
+    //         const res_detail = await $http.get(
+    //             `/api/topics/show.json?id=${id}`
+    //         );
+    //         const res_replys = await $http.get(
+    //             `/api/replies/show.json?topic_id=${id}`
+    //         );
+    //         if (res_detail.status !== 200 || res_replys.status !== 200) {
+    //             return false;
+    //         }
+    //         const detail = res_detail.data;
+    //         const replys = res_replys.data;
+    //         const master_id = detail[0].member.id;
+    //         if (replys) {
+    //             const len = replys.length;
+    //             for (let i = 0; i < len; i++) {
+    //                 const item = replys[i];
+    //                 const is_master = item.member.id === master_id;
+    //                 item.user = {
+    //                     is_master,
+    //                     index: i + 1,
+    //                     id: item.member.id,
+    //                     author: item.member.username,
+    //                     last_reply: this.formatTime(item.last_modified * 1000),
+    //                     avatar: changeImgUrl(item.member.avatar_mini)
+    //                 };
+    //             }
+    //             return {detail, replys};
+    //         }
+    //         return false;
+    //     } catch (error) {
+    //         return false;
+    //     }
+    // }
 
     formatTime(time: string | number) {
         return dayjs(time).fromNow();
     }
 
     //根据id获取帖子详情
-    async getTopicDetail1(params: any) {
+    async getTopicDetail(params: any) {
         try {
             const res = await $http.get(`/t/${params.id}?p=${params.p}`, {
                 headers: {cookie: params.token || ''}
@@ -231,6 +233,8 @@ export class V2exService {
             const $ = cheerio.load(res.data);
             const box = $('#Main .box');
             let id = params.id,
+                reply_num,
+                reply_list = [],
                 once,
                 avatar,
                 title,
@@ -239,60 +243,51 @@ export class V2exService {
                 publish_time,
                 tag_name,
                 tag_link,
-                subtle_list = [],
-                reply_num,
-                last_reply_time,
-                page,
-                reply_list = [];
-            if (Number(params.p) === 1) {
-                title = $(box).first().find('.header h1').text();
-                author = $(box).first().find('.header .gray a').first().text();
-                publish_time = this.formatTime(
-                    $(box).first().find('.header .gray span').attr('title')
-                );
-                tag_name = $(box)
-                    .first()
-                    .find('.header .chevron')
-                    .next()
-                    .text();
-                tag_link = $(box)
-                    .first()
-                    .find('.header .chevron')
-                    .next()
-                    .attr('href')
-                    .split('/')[2];
-                const subtle = $(box).first().find('.subtle');
-                if (subtle.length) {
-                    subtle.each((i, el) => {
-                        const obj = {
-                            time: this.formatTime(
-                                $(el).find('.fade span').attr('title')
-                            ),
-                            content: $(el).find('.topic_content').html()
-                        };
-                        subtle_list.push(obj);
-                    });
-                }
-                content = $(box).first().find('.cell .topic_content').html();
-                const reply_info: any = $(box)
-                    .eq(1)
-                    .find('.cell')
-                    .first()
-                    .find('.gray')
-                    .text();
-                reply_info.replace(/(.*?) 条回复/, (word, target) => {
-                    reply_num = target;
+                subtle_list = [];
+            title = $(box).first().find('.header h1').text();
+            author = $(box).first().find('.header .gray a').first().text();
+            publish_time = this.formatTime(
+                $(box).first().find('.header .gray span').attr('title')
+            );
+            tag_name = $(box)
+                .first()
+                .find('.header .chevron')
+                .next()
+                .text();
+            tag_link = $(box)
+                .first()
+                .find('.header .chevron')
+                .next()
+                .attr('href')
+                .split('/')[2];
+            const subtle = $(box).first().find('.subtle');
+            if (subtle.length) {
+                subtle.each((i, el) => {
+                    const obj = {
+                        time: this.formatTime(
+                            $(el).find('.fade span').attr('title')
+                        ),
+                        content: $(el).find('.topic_content').html()
+                    };
+                    subtle_list.push(obj);
                 });
-                page = $(box)
-                    .eq(1)
-                    .find('.cell .page_input')
-                    .first()
-                    .parent()
-                    .find('a').length;
-                avatar = changeImgUrl(
-                    $(box).first().find('.avatar').attr('src')
-                );
             }
+            content = $(box).first().find('.cell .topic_content').html();
+            avatar = changeImgUrl(
+                $(box).first().find('.avatar').attr('src')
+            );
+            res.data.replace(/var once = "(.*?)";/, (word, target) => {
+                once = target;
+            });
+            const reply_info: any = $(box)
+                .eq(1)
+                .find('.cell')
+                .first()
+                .find('.gray')
+                .text();
+            reply_info.replace(/(.*?) 条回复/, (word, target) => {
+                reply_num = target;
+            });
             const reply_content = $(box)
                 .eq(1)
                 .find('.cell')
@@ -311,24 +306,21 @@ export class V2exService {
                 };
                 reply_list.push(obj);
             });
-            res.data.replace(/var once = "(.*?)";/, (word, target) => {
-                once = target;
-            });
             return {
-                id,
-                once,
-                avatar,
-                title,
-                content,
-                author,
-                publish_time,
-                tag_name,
-                tag_link,
-                subtle_list,
-                reply_num,
-                last_reply_time,
-                page,
-                reply_list
+                detail: {
+                    id,
+                    once,
+                    avatar,
+                    title,
+                    content,
+                    author,
+                    publish_time,
+                    tag_name,
+                    tag_link,
+                    subtle_list,
+                },
+                total: Number(reply_num) || 0,
+                list: reply_list
             };
         } catch (error) {
             return false;

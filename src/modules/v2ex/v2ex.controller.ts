@@ -51,7 +51,7 @@ export class V2exController {
         if (!id || !p) {
             throw new RequireException();
         }
-        return this.v2ex.getTopicDetail1({id, p, token});
+        return this.v2ex.getTopicDetail({id, p, token});
     }
 
     @Get('/login/params')
