@@ -44,13 +44,11 @@ export class V2exService {
             const buff = Buffer.from(url, 'base64');
             url = buff.toString('utf-8');
             url = decodeURIComponent(url);
-            console.log(url)
-            const response = await axios.get(url, {
+            const response = await $http.get(url, {
                 responseType: 'stream',
             });
             return response.data.pipe(res);
         } catch (error) {
-            console.log(error)
             return false;
         }
     }
@@ -141,7 +139,7 @@ export class V2exService {
             const header = $('.page-content-header');
             const list = $('#TopicsNode').find('.cell');
             const nodeInfo = {
-                topic_count: $(header).find('.topic-count strong').text(),
+                topic_count: $(header).find('.topic-count strong').text().replace(/,/g, ''),
                 topic_intro: $(header).find('.intro').text(),
                 topic_title: $(header)
                     .find('.node-breadcrumb')
@@ -177,7 +175,7 @@ export class V2exService {
                 };
                 data.push(obj);
             });
-            return {data, nodeInfo};
+            return {list: data,total: Number(nodeInfo.topic_count) || 0,  detail: nodeInfo};
         } catch (error) {
             return false;
         }

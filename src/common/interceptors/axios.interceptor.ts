@@ -42,7 +42,6 @@ const httpInstance = axios.create({
 });
 const thirdHotInstance = axios.create({
     baseURL: 'https://momoyu.cc/api/hot',
-    httpsAgent: agent,
     headers: {
         Accept: 'application/json'
     }
