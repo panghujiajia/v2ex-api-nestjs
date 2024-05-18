@@ -587,7 +587,7 @@ export class V2exService {
                 const hrefList = $(el).find('.fade a');
                 const message = $(el).find('.fade').text();
                 let messageType = '';
-                if (message.includes('里回复了你')) {
+                if (message.includes('里回复了你') || message.includes('时提到了你')) {
                     messageType = 'reply';
                 } else if (message.includes('收藏了你发布的主题')) {
                     messageType = 'collection';
