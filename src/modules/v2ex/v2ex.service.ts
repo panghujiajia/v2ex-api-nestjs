@@ -10,9 +10,12 @@ dayjs.locale('zh');
 dayjs.extend(relativeTime);
 
 const changeImgUrl = (url: string) => {
+    // 1.	Base64 编码的结果可能含有不适合在 URL 中使用的字符，通常需要进行额外的处理。
+	// 2.	encodeURIComponent 会将 +, /, = 等字符进一步编码，导致服务器可能解码失败。
     const buff = Buffer.from(url, 'utf-8');
-    url = buff.toString('base64');
-    url = encodeURIComponent(url);
+    let base64Url = buff.toString('base64');
+    base64Url = base64Url.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');  // URL安全的Base64
+    url = encodeURIComponent(base64Url);
     return 'https://api.todayhub.cn/v2ex/AACA0F5EB4D2D98A6CE6DFFA99F8254B/' + url;
 };
 
