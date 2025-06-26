@@ -2,6 +2,10 @@ import {Injectable} from '@nestjs/common';
 import cheerio from 'cheerio';
 import {$http} from 'src/common/interceptors/axios.interceptor';
 import axios from 'axios';
+import {marked} from 'marked';
+var TurndownService = require('turndown')
+
+var turndownService = new TurndownService()
 
 const dayjs = require('dayjs');
 const relativeTime = require('dayjs/plugin/relativeTime');
@@ -21,6 +25,30 @@ const changeImgUrl = (url: string) => {
 
 @Injectable()
 export class V2exService {
+    // 修复HTML中缺少协议前缀的链接，并处理图片链接
+    private fixProtocolMissingLinks(html: string): string {
+        if (!html) return html;
+        
+        // 修复img标签中的src属性 (//domain -> https://domain)
+        html = html.replace(/src=["']\/\/([^"']+)["']/g, 'src="https://$1"');
+        
+        // 修复a标签中的href属性 (//domain -> https://domain)
+        html = html.replace(/href=["']\/\/([^"']+)["']/g, 'href="https://$1"');
+        
+        return html;
+    }
+
+    // 处理转换后的Markdown，去掉图片外层的链接
+    private removeImageLinks(markdown: string): string {
+        if (!markdown) return markdown;
+        
+        // 匹配并替换 [![](img_url)](link_url "title") 为 ![](img_url)
+        // 也处理带alt text的情况: [![alt](img_url)](link_url "title") 为 ![alt](img_url)
+        markdown = markdown.replace(/\[!\[([^\]]*)\]\(([^)]+)\)\]\([^)]+(?:\s+"[^"]*")?\)/g, '![$1]($2)');
+        
+        return markdown;
+    }
+
     //图片链接转base64
     async urlToBase64(url: string) {
         try {
@@ -273,7 +301,10 @@ export class V2exService {
                     subtle_list.push(obj);
                 });
             }
-            content = $(box).first().find('.cell .topic_content').html();
+            const topicHtml = $(box).first().find('.cell .topic_content').html();
+            const fixedHtml = this.fixProtocolMissingLinks(topicHtml);
+            const markdownContent = turndownService.turndown(fixedHtml);
+            content = this.removeImageLinks(markdownContent);
             avatar = changeImgUrl(
                 $(box).first().find('.avatar').attr('src')
             );
@@ -295,6 +326,9 @@ export class V2exService {
                 .not((i, el) => !$(el).attr('id'));
 
             reply_content.each((i, el) => {
+                const replyHtml = $(el).find('.reply_content').html();
+                const fixedReplyHtml = this.fixProtocolMissingLinks(replyHtml);
+                const replyMarkdown = turndownService.turndown(fixedReplyHtml);
                 const obj = {
                     author: $(el).find('.dark').text(),
                     avatar: changeImgUrl($(el).find('.avatar').attr('src')),
@@ -303,7 +337,7 @@ export class V2exService {
                         $(el).find('.ago').attr('title')
                     ),
                     like_num: $(el).find('.fade').text().trim(),
-                    content: $(el).find('.reply_content').html()
+                    content: this.removeImageLinks(replyMarkdown)
                 };
                 reply_list.push(obj);
             });
