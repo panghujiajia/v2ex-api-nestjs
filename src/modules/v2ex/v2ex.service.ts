@@ -332,7 +332,9 @@ export class V2exService {
                 const obj = {
                     author: $(el).find('.dark').text(),
                     avatar: changeImgUrl($(el).find('.avatar').attr('src')),
-                    is_master: author == $(el).find('.dark').text(),
+                    is_op: $(el).find('.badges .badge.op').length > 0,
+                    is_mod: $(el).find('.badges .badge.mod').length > 0,
+                    is_pro: $(el).find('.badges .badge.pro').length > 0,
                     reply_time: this.formatTime(
                         $(el).find('.ago').attr('title')
                     ),
