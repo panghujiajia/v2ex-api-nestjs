@@ -256,13 +256,62 @@ export class V2exService {
     //根据id获取帖子详情
     async getTopicDetail(params: any) {
         try {
-            const res = await $http.get(`/t/${params.id}?p=${params.p}`, {
-                headers: {cookie: params.token || ''}
+            // 获取第一页内容
+            const firstPageResult = await this.getTopicDetailPage(params.id, 1, params.token);
+            console.log("🚀 ~ V2exService ~ getTopicDetail ~ firstPageResult:", firstPageResult)
+            if (!firstPageResult) {
+                return false;
+            }
+
+            const { detail, total, list: firstPageReplies } = firstPageResult;
+            
+            // 计算总页数 (V2EX每页100条回复，total就是从reply_num解析出来的总回复数)
+            const totalPages = Math.ceil(total / 100);
+            
+            // 如果只有一页，直接返回
+            if (totalPages <= 1) {
+                return {
+                    detail,
+                    total,
+                    list: firstPageReplies
+                };
+            }
+
+            // 获取其余页面的回复
+            const pagePromises = [];
+            for (let page = 2; page <= totalPages; page++) {
+                pagePromises.push(this.getTopicDetailPage(params.id, page, params.token));
+            }
+
+            const otherPagesResults = await Promise.all(pagePromises);
+            
+            // 合并所有页面的回复
+            let allReplies = [...firstPageReplies];
+            for (const pageResult of otherPagesResults) {
+                if (pageResult && pageResult.list) {
+                    allReplies = allReplies.concat(pageResult.list);
+                }
+            }
+
+            return {
+                detail,
+                total,
+                list: allReplies
+            };
+        } catch (error) {
+            return false;
+        }
+    }
+
+    //获取单页帖子详情
+    private async getTopicDetailPage(id: string, page: number, token?: string) {
+        try {
+            const res = await $http.get(`/t/${id}?p=${page}`, {
+                headers: {cookie: token || ''}
             });
             const $ = cheerio.load(res.data);
             const box = $('#Main .box');
-            let id = params.id,
-                reply_num,
+            let reply_num,
                 reply_list = [],
                 once,
                 avatar,
@@ -273,44 +322,53 @@ export class V2exService {
                 tag_name,
                 tag_link,
                 subtle_list = [];
-            title = $(box).first().find('.header h1').text();
-            author = $(box).first().find('.header .gray a').first().text();
-            publish_time = this.formatTime(
-                $(box).first().find('.header .gray span').attr('title')
-            );
-            tag_name = $(box)
-                .first()
-                .find('.header .chevron')
-                .next()
-                .text();
-            tag_link = $(box)
-                .first()
-                .find('.header .chevron')
-                .next()
-                .attr('href')
-                .split('/')[2];
-            const subtle = $(box).first().find('.subtle');
-            if (subtle.length) {
-                subtle.each((i, el) => {
-                    const obj = {
-                        time: this.formatTime(
-                            $(el).find('.fade span').attr('title')
-                        ),
-                        content: $(el).find('.topic_content').html()
-                    };
-                    subtle_list.push(obj);
+
+            // 只在第一页解析主题详情
+            if (page === 1) {
+                title = $(box).first().find('.header h1').text();
+                author = $(box).first().find('.header .gray a').first().text();
+                publish_time = this.formatTime(
+                    $(box).first().find('.header .gray span').attr('title')
+                );
+                tag_name = $(box)
+                    .first()
+                    .find('.header .chevron')
+                    .next()
+                    .text();
+                tag_link = $(box)
+                    .first()
+                    .find('.header .chevron')
+                    .next()
+                    .attr('href')
+                    .split('/')[2];
+                const subtle = $(box).first().find('.subtle');
+                if (subtle.length) {
+                    subtle.each((i, el) => {
+                        let subtle_content = $(el).find('.topic_content').html();
+                        const fixedHtml = this.fixProtocolMissingLinks(subtle_content);
+                        const markdownContent = turndownService.turndown(fixedHtml);
+                        const obj = {
+                            time: this.formatTime(
+                                $(el).find('.fade span').attr('title')
+                            ),
+                            content: this.removeImageLinks(markdownContent)
+                        };
+                        subtle_list.push(obj);
+                    });
+                }
+                const topicHtml = $(box).first().find('.cell .topic_content').html();
+                const fixedHtml = this.fixProtocolMissingLinks(topicHtml);
+                const markdownContent = turndownService.turndown(fixedHtml);
+                content = this.removeImageLinks(markdownContent);
+                avatar = changeImgUrl(
+                    $(box).first().find('.avatar').attr('src')
+                );
+                res.data.replace(/var once = "(.*?)";/, (word, target) => {
+                    once = target;
                 });
             }
-            const topicHtml = $(box).first().find('.cell .topic_content').html();
-            const fixedHtml = this.fixProtocolMissingLinks(topicHtml);
-            const markdownContent = turndownService.turndown(fixedHtml);
-            content = this.removeImageLinks(markdownContent);
-            avatar = changeImgUrl(
-                $(box).first().find('.avatar').attr('src')
-            );
-            res.data.replace(/var once = "(.*?)";/, (word, target) => {
-                once = target;
-            });
+
+            // 解析回复信息和回复列表
             const reply_info: any = $(box)
                 .eq(1)
                 .find('.cell')
@@ -320,6 +378,7 @@ export class V2exService {
             reply_info.replace(/(.*?) 条回复/, (word, target) => {
                 reply_num = target;
             });
+            
             const reply_content = $(box)
                 .eq(1)
                 .find('.cell')
@@ -343,22 +402,29 @@ export class V2exService {
                 };
                 reply_list.push(obj);
             });
-            return {
-                detail: {
-                    id,
-                    once,
-                    avatar,
-                    title,
-                    content,
-                    author,
-                    publish_time,
-                    tag_name,
-                    tag_link,
-                    subtle_list,
-                },
-                total: Number(reply_num) || 0,
-                list: reply_list
-            };
+
+            if (page === 1) {
+                return {
+                    detail: {
+                        id,
+                        once,
+                        avatar,
+                        title,
+                        content,
+                        author,
+                        publish_time,
+                        tag_name,
+                        tag_link,
+                        subtle_list,
+                    },
+                    total: Number(reply_num) || 0,
+                    list: reply_list
+                };
+            } else {
+                return {
+                    list: reply_list
+                };
+            }
         } catch (error) {
             return false;
         }
